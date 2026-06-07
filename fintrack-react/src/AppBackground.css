@@ -1,0 +1,217 @@
+/* Fond inspiré de portfolio_orima_v2, appliqué à App.jsx */
+.ft-app-shell {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 12% 16%, rgba(0, 255, 163, 0.14), transparent 34%),
+    radial-gradient(circle at 84% 15%, rgba(123, 110, 255, 0.16), transparent 42%),
+    linear-gradient(145deg, #050508 0%, #08090f 58%, #050508 100%);
+}
+
+.ft-app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: 0.28;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+}
+
+.ft-app-shell::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(5, 5, 8, 0.12), rgba(5, 5, 8, 0.45));
+}
+
+.ft-app-bg-orb {
+  position: absolute;
+  width: 460px;
+  height: 460px;
+  border-radius: 999px;
+  filter: blur(100px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.ft-app-bg-orb--left {
+  top: -140px;
+  left: -140px;
+  background: radial-gradient(circle, rgba(0, 255, 163, 0.35), rgba(0, 255, 163, 0));
+}
+
+.ft-app-bg-orb--right {
+  right: -140px;
+  bottom: -150px;
+  background: radial-gradient(circle, rgba(123, 110, 255, 0.34), rgba(123, 110, 255, 0));
+}
+
+.ft-app-bg-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.ft-app-content {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Mode Neon: rendre tous les blocs transparents */
+.ft-neon-mode :where(
+  div,
+  section,
+  article,
+  aside,
+  main,
+  header,
+  footer,
+  nav,
+  form,
+  button,
+  input,
+  select,
+  textarea,
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
+  ul,
+  ol,
+  li
+):not(.ft-app-shell):not(.ft-app-bg-orb):not(.ft-app-bg-canvas) {
+  background-color: transparent !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
+.ft-neon-mode :where(
+  div,
+  section,
+  article,
+  aside,
+  main,
+  header,
+  footer,
+  nav,
+  form,
+  button,
+  input,
+  select,
+  textarea,
+  table,
+  thead,
+  tbody,
+  tr,
+  th,
+  td,
+  ul,
+  ol,
+  li
+) {
+  border-color: rgba(232, 234, 246, 0.22) !important;
+}
+
+@keyframes ft-neon-pulse {
+  0%,
+  100% {
+    opacity: 0.82;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes ft-neon-drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+
+  50% {
+    transform: translate3d(26px, -20px, 0);
+  }
+}
+
+.ft-neon-mode {
+  color: #edf6ff;
+}
+
+.ft-neon-mode .ft-app-shell {
+  background:
+    radial-gradient(circle at 10% 14%, rgba(0, 255, 163, 0.16), transparent 36%),
+    radial-gradient(circle at 88% 12%, rgba(123, 110, 255, 0.44), transparent 40%),
+    radial-gradient(circle at 54% 88%, rgba(0, 198, 255, 0.24), transparent 44%),
+    linear-gradient(145deg, #020204 0%, #060813 52%, #050508 100%);
+}
+
+.ft-neon-mode .ft-app-shell::before {
+  opacity: 0.52;
+  mix-blend-mode: screen;
+}
+
+.ft-neon-mode .ft-app-shell::after {
+  opacity: 0.96;
+  background: linear-gradient(180deg, rgba(2, 2, 4, 0.08), rgba(2, 2, 4, 0.66));
+}
+
+.ft-neon-mode .ft-app-bg-orb {
+  width: 620px;
+  height: 620px;
+  filter: blur(128px) saturate(1.35);
+  opacity: 0.92;
+  animation: ft-neon-pulse 7.2s ease-in-out infinite, ft-neon-drift 12s ease-in-out infinite;
+}
+
+.ft-neon-mode .ft-app-bg-orb--left {
+  top: -210px;
+  left: -210px;
+  background: radial-gradient(circle, rgba(0, 255, 163, 0.26), rgba(0, 255, 163, 0.03) 60%, rgba(0, 255, 163, 0) 72%);
+}
+
+.ft-neon-mode .ft-app-bg-orb--right {
+  right: -210px;
+  bottom: -220px;
+  background: radial-gradient(circle, rgba(123, 110, 255, 0.72), rgba(123, 110, 255, 0.05) 58%, rgba(123, 110, 255, 0) 72%);
+  animation-delay: 1.6s, 2.2s;
+}
+
+.ft-neon-mode .ft-app-bg-canvas {
+  opacity: 1;
+  filter: saturate(1.25) contrast(1.08);
+}
+
+.ft-neon-mode :where(button, input, select, textarea) {
+  box-shadow: 0 0 0 1px rgba(0, 255, 163, 0.1), 0 0 16px rgba(123, 110, 255, 0.16) !important;
+}
+
+/* Header noir en mode Neon (commentaire navigateur #1) */
+.ft-neon-mode .ft-page-header {
+  background: rgba(3, 6, 12, 0.97) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14) !important;
+  padding: 10px 20px !important;
+  height: 77px;
+  box-sizing: border-box;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.ft-neon-mode .ft-page-header-inner {
+  min-height: 0;
+  height: 100%;
+}

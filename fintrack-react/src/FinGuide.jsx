@@ -1,0 +1,1031 @@
+// FinGuide.jsx — Guide Financier FinTrack (v2 — enrichi)
+import { useState } from "react";
+
+const C = {
+  sidebar:"#0B1829", sidebarText:"#7A95AF",
+  bg:"#EEF2F8", card:"#FFFFFF", border:"#E4E9F2",
+  text:"#1A2637", muted:"#64748B", faint:"#F4F7FB",
+  blue:"#3B82F6", indigo:"#6366F1", green:"#10B981",
+  red:"#EF4444", amber:"#F59E0B", purple:"#8B5CF6",
+  teal:"#0EA5E9", pink:"#EC4899",
+};
+
+// ── Données ────────────────────────────────────────────────────────────────
+const SECTIONS = [
+  {
+    id:"economiser", label:"Économiser", emoji:"🏦", color:C.green,
+    subtitle:"Construire une épargne solide et durable",
+    intro:"Économiser ne se résume pas à se priver. C'est une discipline qui se construit avec des méthodes éprouvées, adaptées à votre situation réelle.",
+    articles:[
+      {
+        title:"La règle 50/30/20",
+        tag:"Fondamentaux", tagColor:C.green, icon:"📊",
+        description:"La méthode la plus simple pour répartir automatiquement chaque revenu.",
+        steps:[
+          {label:"50% — Besoins absolus", detail:"Loyer, alimentation, transport, factures d'eau et d'électricité, assurances. Ce sont les dépenses que vous ne pouvez pas supprimer sans changer de vie."},
+          {label:"30% — Envies et confort", detail:"Restaurants, loisirs, vêtements non essentiels, abonnements streaming, sorties. Ce qui améliore votre qualité de vie au quotidien."},
+          {label:"20% — Épargne et investissement", detail:"Virement automatique le jour du salaire, AVANT de dépenser quoi que ce soit. Subdivisez : 10% fonds d'urgence, 10% objectifs long terme."},
+          {label:"Adaptez les pourcentages", detail:"Si votre loyer dépasse 50% de vos revenus, ajustez à 60/20/20 ou 65/15/20. L'important est d'avoir une règle fixe et de l'appliquer."},
+          {label:"Automatisez dès le 1er", detail:"Programmez un virement automatique vers votre compte épargne le jour de réception du salaire. Ce que vous ne voyez pas, vous ne le dépensez pas."},
+        ],
+        examples:[
+          {title:"Salaire 500 000 Ar/mois", detail:"Besoins : 250 000 Ar · Envies : 150 000 Ar · Épargne : 100 000 Ar"},
+          {title:"Salaire 1 500 000 Ar/mois", detail:"Besoins : 750 000 Ar · Envies : 450 000 Ar · Épargne : 300 000 Ar"},
+          {title:"Salaire 3 000 000 Ar/mois", detail:"Besoins : 1 500 000 Ar · Envies : 900 000 Ar · Épargne : 600 000 Ar"},
+        ],
+        warnings:["Ne pas inclure l'épargne dans les 'besoins' pour gonfler ce poste","Évitez de reporter l'épargne au 'mois prochain' — ça n'arrive jamais"],
+        keyNumbers:[{label:"Épargne minimale", value:"20%"},{label:"Besoins max", value:"50%"},{label:"Revue recommandée", value:"1×/mois"}],
+        tip:"Automatisez le virement de 20% dès réception du salaire. Ce que vous ne voyez pas, vous ne le dépensez pas.",
+        fintrackLink:"Configurez un virement automatique dans Transactions → Nouvelle opération récurrente → Épargne mensuelle",
+      },
+      {
+        title:"Le fonds d'urgence",
+        tag:"Priorité #1", tagColor:C.amber, icon:"🛡️",
+        description:"3 à 6 mois de dépenses fixes, intouchables sauf vraie urgence. La base de toute sécurité financière.",
+        steps:[
+          {label:"Calculez votre cible minimale", detail:"Additionnez : loyer + alimentation mensuelle + transport + factures + assurances. Multipliez par 4 (minimum). C'est votre cible de départ."},
+          {label:"Cible idéale : 6 mois", detail:"Si votre secteur est instable ou si vous êtes freelance, visez 6 mois. En emploi stable, 3 mois suffisent."},
+          {label:"Compte séparé et accessible", detail:"Gardez ce fonds dans un compte distinct de votre compte courant. Pas bloqué — liquidité immédiate — mais pas trop accessible pour éviter la tentation."},
+          {label:"Ne pas investir ce fonds", detail:"Ce n'est pas un placement. Il doit être disponible en 24h. Pas d'actions, pas de crypto, pas de dépôt à terme bloqué."},
+          {label:"Ne pas l'utiliser pour des non-urgences", detail:"Une promotion en ligne n'est PAS une urgence. Une réparation voiture indispensable, un accident, une perte d'emploi : oui."},
+          {label:"Reconstituer immédiatement après usage", detail:"Si vous y touchez, c'est votre priorité #1 de le reconstituer avant tout autre objectif épargne."},
+        ],
+        examples:[
+          {title:"Calcul pour dépenses fixes de 400 000 Ar", detail:"Cible 3 mois : 1 200 000 Ar · Cible 6 mois : 2 400 000 Ar"},
+          {title:"En partant de zéro à 50 000 Ar/mois", detail:"Vous atteignez 3 mois d'urgence en 24 mois. Augmentez l'effort si possible."},
+        ],
+        warnings:["Ne jamais utiliser le fonds d'urgence pour un investissement, même 'sûr'","Ne pas attendre d'avoir un gros salaire pour commencer — même 10 000 Ar/mois est un début"],
+        keyNumbers:[{label:"Cible minimale", value:"3 mois"},{label:"Cible idéale", value:"6 mois"},{label:"Disponibilité", value:"< 24h"}],
+        tip:"Tant que le fonds d'urgence n'est pas constitué, reportez tout autre investissement. C'est votre filet de sécurité numéro un.",
+        fintrackLink:"Créez un objectif 'Fonds d'urgence' dans l'onglet Objectifs avec une date cible et un montant calculé",
+      },
+      {
+        title:"Épargne automatique",
+        tag:"Habitude clé", tagColor:C.blue, icon:"⚙️",
+        description:"Automatiser l'épargne est plus efficace que compter sur la discipline personnelle.",
+        steps:[
+          {label:"Principe : payez-vous en premier", detail:"Avant de payer quoi que ce soit, virez votre épargne. Pas ce qui reste à la fin du mois — ce qui part en premier au début."},
+          {label:"Définissez un montant fixe", detail:"Pas un pourcentage variable selon l'humeur. Un montant fixe, tous les mois, sans discussion. Augmentez-le seulement lors d'une hausse de revenus."},
+          {label:"Programmez le virement", detail:"Mobile banking ou instruction permanente à votre banque. Le virement se fait automatiquement le jour du salaire."},
+          {label:"Plusieurs comptes, plusieurs objectifs", detail:"Compte urgence + compte projet voiture + compte vacances. Chaque objectif a son compte. Le cerveau gère mieux des cases séparées."},
+          {label:"Augmentez progressivement", detail:"Commencez à 5% si 20% est trop difficile. Augmentez de 1% par mois. En 15 mois vous êtes à 20% sans avoir souffert."},
+        ],
+        examples:[
+          {title:"Progression sur 3 ans (200 000 Ar/mois)", detail:"Année 1 : 2 400 000 Ar · Année 2 : 4 800 000 Ar · Année 3 : 7 200 000 Ar + intérêts"},
+          {title:"Effet de l'augmentation de 1%/mois", detail:"Mois 1 : 5% → Mois 15 : 20% → Sans jamais ressentir de choc"},
+        ],
+        warnings:["Ne jamais 'sauter' un mois — l'habitude se brise en 3 semaines","Évitez de choisir un montant trop élevé dès le début — le découragement est le principal ennemi"],
+        keyNumbers:[{label:"Effort minimal", value:"5%"},{label:"Objectif standard", value:"20%"},{label:"Jour idéal", value:"J+1 salaire"}],
+        tip:"Un virement de 50 000 Ar/mois pendant 10 ans (avec 6% de rendement) produit plus de 8 000 000 Ar. La régularité prime sur le montant.",
+        fintrackLink:"Ajoutez une récurrence mensuelle 'Épargne' dans Transactions → Nouvelle opération récurrente",
+      },
+      {
+        title:"Réduire les dépenses cachées",
+        tag:"Audit", tagColor:C.red, icon:"🔍",
+        description:"La majorité des gens ont 20 à 30% de dépenses inutiles qu'ils ne remarquent pas.",
+        steps:[
+          {label:"Listez TOUS vos abonnements", detail:"Streaming (Netflix, YouTube Premium, Spotify), apps, logiciels, newsletters payantes, salles de sport. Faites la liste exhaustive."},
+          {label:"Calculez le coût annuel de chacun", detail:"Multipliez chaque abonnement × 12. L'effet est souvent choquant — un abonnement de 10 000 Ar/mois = 120 000 Ar/an."},
+          {label:"Test des 30 jours", detail:"Désactivez un abonnement pendant 30 jours. Si vous ne l'avez pas manqué, supprimez-le définitivement."},
+          {label:"Auditez vos courses alimentaires", detail:"10 à 15% des aliments achetés sont jetés. Planifiez vos menus, faites une liste, ne faites pas les courses quand vous avez faim."},
+          {label:"Les dépenses sociales invisibles", detail:"Cadeaux systématiques, sorties de groupe pour ne pas être exclu, tournées. Définissez un budget mensuel fixe pour 'vie sociale'."},
+          {label:"Renégociez vos contrats annuels", detail:"Assurances, forfait téléphone, internet. Appelez chaque année pour négocier. Les compagnies réservent les meilleures offres aux nouveaux clients."},
+        ],
+        examples:[
+          {title:"Audit type d'un mois", detail:"3 abonnements streaming inutilisés : 30 000 Ar · Gaspillage alimentaire : 50 000 Ar · Total récupérable : 80 000 Ar/mois"},
+          {title:"Impact sur 12 mois", detail:"80 000 Ar/mois économisés = 960 000 Ar/an — l'équivalent de 2 mois de salaire pour beaucoup"},
+        ],
+        warnings:["Ne pas confondre couper toutes les dépenses plaisir — l'austérité totale mène à l'abandon","Attention aux essais gratuits qui deviennent payants automatiquement"],
+        keyNumbers:[{label:"Gaspillage alimentaire moyen", value:"10–15%"},{label:"Abonnements inutilisés", value:"3–5 en moyenne"},{label:"Audit fréquence", value:"2×/an"}],
+        tip:"Faites cet audit une fois par an, idéalement en janvier. Programmez un rappel calendrier.",
+        fintrackLink:"Retrouvez vos abonnements dans Transactions → filtrer par catégorie Abonnements — vérifiez les récurrences actives",
+      },
+      {
+        title:"Méthode des enveloppes (digitale)",
+        tag:"Organisation", tagColor:C.purple, icon:"💼",
+        description:"Allouez chaque euro/ariary à une catégorie avant de dépenser — et ne dépassez jamais l'enveloppe.",
+        steps:[
+          {label:"Choisissez 5 à 8 catégories maximum", detail:"Alimentation, transport, loisirs, vêtements, santé, divers. Pas plus. Trop de catégories = abandon garanti en 2 semaines."},
+          {label:"Fixez un budget mensuel par catégorie", detail:"Basez-vous sur vos 3 derniers mois réels. Soyez réaliste, pas idéaliste. Réduire progressivement, pas d'un coup."},
+          {label:"Principe strictement contraignant", detail:"Quand l'enveloppe est vide, elle est vide. Pas de transfert d'une autre enveloppe (sauf règle explicite définie à l'avance)."},
+          {label:"Système numérique", detail:"Utilisez FinTrack pour tracker chaque dépense en temps réel. Vérifiez votre budget restant AVANT un achat, pas après."},
+          {label:"Enveloppe 'imprévus'", detail:"Créez systématiquement une enveloppe 'divers/imprévus' de 10% du budget total. Les mois sans dépense : transférez en épargne."},
+          {label:"Revue mensuelle", detail:"Le 1er de chaque mois : 30 minutes pour analyser, ajuster les montants, identifier les catégories qui dérapent."},
+        ],
+        examples:[
+          {title:"Budget 800 000 Ar/mois", detail:"Alimentation 250k · Transport 100k · Loisirs 80k · Vêtements 50k · Santé 50k · Divers 80k · Épargne 190k"},
+          {title:"Alerte enveloppe vide le 20 du mois", detail:"Si 'Loisirs' est à zéro le 20 : cuisinez à la maison, activités gratuites. Pas de transfert."},
+        ],
+        warnings:["Ne pas créer trop de catégories — la simplicité prime sur la précision","Ne pas regarder son budget seulement en fin de mois — trop tard pour ajuster"],
+        keyNumbers:[{label:"Catégories max", value:"8"},{label:"Enveloppe divers", value:"10%"},{label:"Revue mensuelle", value:"30 min"}],
+        tip:"Commencez avec 5 enveloppes maximum. La simplicité est la clé de la durabilité.",
+        fintrackLink:"Utilisez l'onglet Budget pour définir et suivre vos limites par catégorie en temps réel",
+      },
+      {
+        title:"Épargner malgré un faible revenu",
+        tag:"Accessibilité", tagColor:C.teal, icon:"🌱",
+        description:"Il n'existe pas de revenu 'trop bas' pour commencer à épargner. Même 2 000 Ar/jour changent une vie.",
+        steps:[
+          {label:"La règle du 1%", detail:"Si 20% est impossible, commencez à 1% de votre revenu. 1% de 300 000 Ar = 3 000 Ar/mois. Peu, mais ça crée l'habitude."},
+          {label:"Augmentez de 1% à chaque augmentation", detail:"Chaque fois que votre revenu augmente, augmentez immédiatement votre épargne du même pourcentage. Ne vous habituez pas à la hausse."},
+          {label:"Micro-épargne quotidienne", detail:"Économisez 500 à 1 000 Ar/jour. 500 Ar/jour = 15 000 Ar/mois = 180 000 Ar/an. Ça semble petit, ça s'accumule."},
+          {label:"Réduire avant d'économiser", detail:"Avec un faible revenu, chaque ariary compte. Auditez impitoyablement chaque dépense non essentielle avant de chercher à économiser plus."},
+          {label:"Revenus complémentaires", detail:"Un revenu trop bas ne peut pas être 'optimisé' indéfiniment. À un moment, augmenter les revenus est la seule solution. Voyez la section 'Gagner plus'."},
+        ],
+        examples:[
+          {title:"500 Ar/jour pendant 5 ans", detail:"Total épargné : 912 500 Ar — sans aucun rendement. Avec intérêts : plus de 1 000 000 Ar"},
+          {title:"1% de 250 000 Ar/mois", detail:"2 500 Ar/mois → 30 000 Ar/an → habitude installée → augmentez progressivement"},
+        ],
+        warnings:["Ne pas penser qu'un faible montant 'ne sert à rien' — l'habitude vaut plus que le montant","Ne pas attendre le 'bon moment' — il n'arrive jamais"],
+        keyNumbers:[{label:"Minimum viable", value:"1%"},{label:"Micro-épargne", value:"500 Ar/j"},{label:"Revue", value:"Chaque hausse de salaire"}],
+        tip:"L'habitude d'épargner se construit avec n'importe quel montant. Commencez maintenant, augmentez ensuite.",
+        fintrackLink:"Créez une récurrence 'Micro-épargne quotidienne' ou mensuelle dans Transactions, aussi petite soit-elle",
+      },
+    ],
+  },
+
+  {
+    id:"gagner", label:"Gagner plus", emoji:"💰", color:C.amber,
+    subtitle:"Multiplier ses sources de revenus",
+    intro:"Économiser a ses limites. Augmenter ses revenus, non. Voici les voies concrètes et accessibles, avec ou sans connexion internationale.",
+    articles:[
+      {
+        title:"Freelance en ligne",
+        tag:"Revenus actifs", tagColor:C.amber, icon:"💻",
+        description:"Vendre ses compétences à des clients internationaux depuis Madagascar.",
+        steps:[
+          {label:"Identifiez votre compétence monétisable", detail:"Développement web/mobile, design graphique/UI, rédaction, traduction français-anglais-malgache, data entry, comptabilité, support client, marketing digital, montage vidéo."},
+          {label:"Choisissez 1 plateforme et maîtrisez-la", detail:"Débutants : Upwork, Fiverr. Intermédiaires : Malt, Toptal. Spécialistes : plateformes niche (99designs pour design, Codementor pour dev). Profil à 100% avant de postuler."},
+          {label:"Stratégie des premières missions", detail:"Acceptez des prix inférieurs au marché pour les 3 premières missions. L'objectif : obtenir 5 avis 5 étoiles. Après, augmentez vos prix de 20% à chaque mois."},
+          {label:"Spécialisez-vous absolument", detail:"'Développeur React spécialisé SaaS' gagne 3× plus qu'un 'développeur web'. 'Rédacteur SEO spécialisé finance' gagne 2× plus qu'un 'rédacteur'."},
+          {label:"Gérez votre réputation activement", detail:"Répondez aux messages en moins de 1h. Livrez avant la deadline. Demandez systématiquement un avis après chaque mission réussie."},
+          {label:"Augmentez vos tarifs régulièrement", detail:"Tous les 3 mois, augmentez de 10 à 20%. Les bons clients restent. Les mauvais clients (ceux qui marchandent) partent. Win-win."},
+          {label:"Diversifiez les plateformes progressivement", detail:"Une fois stable sur une plateforme, testez-en une deuxième. Ne dépendez jamais d'une seule source."},
+        ],
+        examples:[
+          {title:"Progression type sur 12 mois", detail:"Mois 1–3 : 50$/mission (5 missions) → Mois 4–6 : 80$/mission → Mois 7–12 : 120–200$/mission"},
+          {title:"Data entry débutant", detail:"15$/h sur Upwork × 20h/semaine = 300$/semaine = ~1 350 000 Ar/mois en activité secondaire"},
+          {title:"Traducteur FR/EN spécialisé", detail:"0.08–0.12$/mot × 3 000 mots/jour = 240–360$/jour pour un bon traducteur"},
+        ],
+        warnings:["Ne pas travailler sans contrat écrit, même pour de petites missions","Attention aux clients qui demandent de 'tester' votre travail sans payer — c'est du vol"],
+        keyNumbers:[{label:"Profil minimum", value:"100%"},{label:"Premiers avis cibles", value:"5 × 5⭐"},{label:"Hausse trimestrielle", value:"+10–20%"}],
+        tip:"Spécialisez-vous. La spécialisation est le levier le plus puissant pour multiplier vos revenus freelance.",
+        fintrackLink:"Suivez vos candidatures et missions dans l'onglet Suivi de Taf — un onglet par type de mission",
+      },
+      {
+        title:"Négocier son salaire",
+        tag:"Impact immédiat", tagColor:C.blue, icon:"🤝",
+        description:"La négociation salariale est la stratégie au meilleur rapport effort/résultat de toute votre carrière.",
+        steps:[
+          {label:"Documentez votre valeur marché", detail:"Consultez Glassdoor, LinkedIn Salary, les offres d'emploi similaires. Notez la fourchette basse, médiane et haute pour votre poste et expérience."},
+          {label:"Quantifiez vos contributions", detail:"Listez vos résultats mesurables des 12 derniers mois : revenus générés, coûts réduits, projets livrés, équipes managées. Les chiffres sont vos arguments."},
+          {label:"Choisissez le bon moment", detail:"Après une réussite notable. Lors de l'évaluation annuelle. Après avoir reçu une offre externe. Jamais lors d'une période difficile de l'entreprise."},
+          {label:"Annoncez un chiffre précis et élevé", detail:"Ne demandez pas une 'augmentation'. Annoncez : 'Je souhaite passer à X Ar/mois.' Un chiffre précis (pas une fourchette) ancre la négociation."},
+          {label:"La technique du silence", detail:"Après avoir annoncé votre chiffre, ne dites plus rien. Le premier qui parle concède. Apprenez à rester à l'aise dans le silence."},
+          {label:"Négociez le package complet", detail:"Si le salaire est bloqué : jours de télétravail, formation payée, prime annuelle, mutuelle améliorée, matériel. Tout a une valeur monétisable."},
+          {label:"Toujours obtenir une contre-offre avant de partir", detail:"Avant d'accepter une offre externe, montrez-la à votre employeur actuel. Souvent, une contre-offre suit."},
+        ],
+        examples:[
+          {title:"Effet sur 20 ans d'une négociation réussie", detail:"+100 000 Ar/mois = 1 200 000 Ar/an × 20 ans = 24 000 000 Ar supplémentaires — sans compter les augmentations composées"},
+          {title:"Script de négociation simple", detail:"'D'après mes recherches sur le marché et mes résultats cette année [citer les chiffres], je souhaite passer à [X Ar]. Est-ce faisable ?'"},
+        ],
+        warnings:["Ne jamais négocier avec une contre-offre fictive — ça se vérifie facilement","Ne pas mélanger problèmes personnels (loyer, dettes) et négociation professionnelle"],
+        keyNumbers:[{label:"Augmentation moyenne possible", value:"+10–25%"},{label:"Impact sur 20 ans", value:"×3 le différentiel"},{label:"Fréquence", value:"1×/an minimum"}],
+        tip:"+10% de salaire maintenant = des dizaines de millions d'ariary supplémentaires sur 20 ans grâce aux augmentations composées.",
+        fintrackLink:"Enregistrez vos revenus salariaux dans Revenus → Salaire, et comparez mois à mois l'évolution",
+      },
+      {
+        title:"Activité secondaire (side business)",
+        tag:"Revenus actifs", tagColor:C.purple, icon:"🏪",
+        description:"Une deuxième source de revenus, même petite, change fondamentalement votre sécurité financière.",
+        steps:[
+          {label:"Évaluez votre temps réel disponible", detail:"Soyez honnête : combien d'heures par semaine pouvez-vous réallocuer sans sacrifier santé, famille et performance professionnelle ? 5h/semaine est souvent réaliste."},
+          {label:"Services locaux accessibles rapidement", detail:"Cours particuliers (maths, langues, informatique), réparations électroniques, couture/retouches, photographie événementielle, traiteur occasionnel, jardinage."},
+          {label:"Services en ligne", detail:"Gestion réseaux sociaux pour TPE locales, community management, saisie de données, support client en ligne, modération de contenu."},
+          {label:"Commencez dans votre réseau existant", detail:"Vos premiers clients sont votre famille, vos amis, vos collègues, les parents d'élèves. Offrez une première prestation à prix réduit en échange d'un avis."},
+          {label:"Fixez une règle de réinvestissement", detail:"Les 6 premiers mois : réinvestissez 100% des revenus dans le business (matériel, marketing, formation). Ensuite : 50% réinvesti, 50% prélevé."},
+          {label:"Donnez un objectif concret au side business", detail:"'Mon side business doit couvrir mon loyer.' Ou l'internet, ou les courses alimentaires. Un objectif concret maintient la motivation."},
+        ],
+        examples:[
+          {title:"Cours particuliers 2h/soir × 5 soirs", detail:"10h/semaine × 5 000 Ar/h = 50 000 Ar/semaine = 200 000 Ar/mois en supplément"},
+          {title:"Gestion Instagram pour 3 TPE locales", detail:"3 clients × 80 000 Ar/mois = 240 000 Ar/mois pour 8–10h de travail hebdomadaire"},
+        ],
+        warnings:["Ne pas négliger votre emploi principal au profit du side business","Ne pas mélanger les finances du side business avec vos finances personnelles dès le premier revenu"],
+        keyNumbers:[{label:"Temps minimum", value:"5h/sem"},{label:"Réinvestissement initial", value:"100%"},{label:"Délai premier revenu", value:"1–4 semaines"}],
+        tip:"Votre side business doit couvrir une dépense fixe spécifique. Ça le rend concret, tangible, motivant.",
+        fintrackLink:"Suivez les revenus de votre side business dans Revenus — créez une catégorie dédiée pour mesurer sa croissance",
+      },
+      {
+        title:"Revenus passifs numériques",
+        tag:"Revenus passifs", tagColor:C.green, icon:"📱",
+        description:"Créer une fois, percevoir longtemps. Les actifs numériques sont accessibles sans capital initial important.",
+        steps:[
+          {label:"Templates et ressources digitales", detail:"Templates Notion, Figma, PowerPoint, Excel, Canva. Vendez sur Gumroad, Etsy, Creative Market. Un bon template vendu à 10$ peut générer des centaines de ventes."},
+          {label:"Cours et formations en ligne", detail:"Udemy, Skillshare, votre propre site. Documentez ce que vous maîtrisez : bureautique, langue, compétence technique, soft skill. Un cours bien noté vend pendant des années."},
+          {label:"Contenu YouTube ou podcast", detail:"12 à 18 mois de travail avant les premiers revenus sérieux. Mais une chaîne de 10 000 abonnés peut rapporter 100–500$/mois en publicité + sponsoring."},
+          {label:"Ebooks et guides numériques", detail:"Prix entre 5$ et 50$, marge quasi 100%. Documentez une expertise spécifique que les gens paient pour éviter d'apprendre par eux-mêmes."},
+          {label:"Affiliation", detail:"Recommandez des produits en échange d'une commission (5–30%). Fonctionne si vous avez déjà une audience (blog, réseaux, chaîne)."},
+          {label:"Mettez en place la distribution automatique", detail:"Gumroad, Payhip ou Stripe gèrent les paiements automatiquement. Vous dormez, ils vendent."},
+        ],
+        examples:[
+          {title:"Template Notion vendu à 15$", detail:"100 ventes/an = 1 500$ = ~6 750 000 Ar — pour un travail initial de 20–30h"},
+          {title:"Cours Udemy sur Excel (50h de création)", detail:"300 inscrits × 10$ × 50% (part Udemy) = 1 500$/an passif si bien référencé"},
+        ],
+        warnings:["Le revenu passif demande un effort INTENSE au début — c'est souvent plus actif que le travail classique","Ne pas vendre quelque chose de médiocre en espérant des avis positifs — un mauvais démarrage est quasi irrécupérable"],
+        keyNumbers:[{label:"Délai avant revenus", value:"3–18 mois"},{label:"Marge ebooks", value:"~100%"},{label:"Commission affiliation", value:"5–30%"}],
+        tip:"Le revenu passif demande un effort intense au début (3–12 mois) puis diminue progressivement tout en générant des revenus.",
+        fintrackLink:"Catégorisez vos revenus passifs séparément dans Revenus pour suivre leur croissance progressive",
+      },
+      {
+        title:"Monétiser ses compétences localement",
+        tag:"Madagascar", tagColor:C.pink, icon:"🇲🇬",
+        description:"Les opportunités spécifiques au marché malgache — souvent sous-exploitées.",
+        steps:[
+          {label:"Formation et coaching bureautique", detail:"Excel, Word, PowerPoint, utilisation smartphone pro. Forte demande locale dans les entreprises, administrations et ONGs. 10 000–30 000 Ar/h selon niveau."},
+          {label:"Prestataire BPO pour entreprises françaises", detail:"Saisie de données, traduction français-malgache, modération de contenu, support client francophone. Taux horaires en MGA souvent supérieurs au marché local."},
+          {label:"Agence réseaux sociaux locale", detail:"Les PME malgaches ont des pages Facebook mal gérées. Un service de gestion de 3–5 pages à 80 000–150 000 Ar/page/mois est viable rapidement."},
+          {label:"Commerce de produits locaux à l'export", detail:"Vanille, girofle, raphia, broderie, artisanat. Le prix à l'export est souvent 5–10× le prix local. Nécessite un réseau de distribution international."},
+          {label:"Intermédiaire import-export", detail:"Mettre en relation des producteurs locaux avec des acheteurs internationaux. Commission de 5–15% sur les transactions sans capital propre immobilisé."},
+          {label:"Location de matériel", detail:"Sono, vidéoprojecteur, tentes événementielles, tables et chaises. Investissement initial amorti en 6–12 mois si bien géré."},
+        ],
+        examples:[
+          {title:"Formation Excel pour entreprise", detail:"Formation 2 jours × 15 personnes × 15 000 Ar/personne = 450 000 Ar pour 16h de travail"},
+          {title:"Gestion 5 pages Facebook TPE", detail:"5 × 100 000 Ar/mois = 500 000 Ar/mois pour 15–20h hebdomadaires"},
+        ],
+        warnings:["Pour l'export : vérifiez les réglementations douanières avant tout engagement","Pour la formation : ne sur-promettez pas sur les résultats — votre réputation en dépend"],
+        keyNumbers:[{label:"Formation : tarif horaire", value:"10–30k Ar"},{label:"Commission commerce", value:"5–15%"},{label:"Amortissement location", value:"6–12 mois"}],
+        tip:"Combinez expertise locale + distribution internationale. Vendre des compétences au prix du marché international depuis Madagascar est la combinaison gagnante.",
+        fintrackLink:"Enregistrez chaque source de revenu séparément dans Revenus pour identifier laquelle performe le mieux sur 6 mois",
+      },
+    ],
+  },
+
+  {
+    id:"investir", label:"Investir & s'enrichir", emoji:"📈", color:C.indigo,
+    subtitle:"Faire travailler son argent pour soi",
+    intro:"La richesse ne vient pas du travail seul — elle vient du travail de votre argent. Comprendre les mécanismes de la création de richesse est la compétence la plus rentable qui soit.",
+    articles:[
+      {
+        title:"L'effet des intérêts composés",
+        tag:"Fondamental absolu", tagColor:C.indigo, icon:"🔁",
+        description:"Le phénomène financier le plus puissant de l'histoire. Einstein l'aurait appelé 'la huitième merveille du monde'.",
+        steps:[
+          {label:"Comprendre le principe", detail:"Vos gains génèrent eux-mêmes des gains. À 10%/an : 1 000 000 Ar devient 2 594 000 en 10 ans, 17 449 000 en 30 ans. Sans ajouter un seul ariary supplémentaire."},
+          {label:"Le facteur temps est crucial", detail:"Commencer à 25 ans vs 35 ans à 200 000 Ar/mois avec 8% de rendement : l'écart à 65 ans est de plus de 100 000 000 Ar. 10 ans de différence = capital final doublé."},
+          {label:"La règle des 72", detail:"Divisez 72 par votre taux annuel pour connaître le temps de doublement. À 6% : 72÷6 = 12 ans. À 10% : 72÷10 = 7,2 ans. À 12% : 6 ans."},
+          {label:"Ne jamais interrompre le cycle", detail:"Chaque retrait brise l'effet exponentiel à l'endroit le plus précieux : la fin. Retirez en début de cycle, l'impact est limité. En fin de cycle, l'impact est catastrophique."},
+          {label:"Réinvestir les dividendes", detail:"Si un placement génère des revenus (dividendes, intérêts), réinvestissez-les systématiquement. C'est la mécanique des intérêts composés appliquée."},
+          {label:"Commencez maintenant, peu importe le montant", detail:"10 000 Ar/mois à 8% pendant 30 ans = 14 900 000 Ar. Ce n'est pas le montant qui compte au départ, c'est l'habitude."},
+        ],
+        examples:[
+          {title:"100 000 Ar/mois pendant 30 ans à 8%", detail:"Capital investi : 36 000 000 Ar · Valeur finale : ~149 000 000 Ar — soit 4× plus que ce que vous avez mis"},
+          {title:"Démarrer à 25 ans vs 35 ans (200k/mois à 8%)", detail:"À 65 ans : 25 ans → 700M Ar · 35 ans → 300M Ar. Différence : 400M Ar pour 10 ans de délai."},
+        ],
+        warnings:["Ne jamais compter sur les intérêts composés pour sortir d'une dette — ils jouent dans l'autre sens","Ne pas toucher aux placements long terme pour des dépenses courantes"],
+        keyNumbers:[{label:"Règle des 72", value:"72 ÷ taux"},{label:"Impact de 10 ans", value:"×2 le capital"},{label:"Minimum recommandé", value:"20% du revenu"}],
+        tip:"La règle des 72 : divisez 72 par votre taux pour connaître le temps de doublement de votre argent.",
+        fintrackLink:"Créez un objectif 'Investissement long terme' dans Objectifs et suivez sa progression annuelle",
+      },
+      {
+        title:"Types d'actifs : comprendre avant d'investir",
+        tag:"Stratégie", tagColor:C.blue, icon:"🏭",
+        description:"Les riches achètent des actifs. Les autres achètent des passifs en croyant acheter des actifs.",
+        steps:[
+          {label:"Définition d'un actif réel", detail:"Un actif met de l'argent dans votre poche régulièrement, sans que vous travailliez activement. Une voiture n'est PAS un actif (sauf si vous êtes chauffeur de taxi). Un appartement loué : oui."},
+          {label:"Actions et ETF", detail:"Parts de propriété d'entreprises. Accessible en ligne. Les ETF (fonds indiciels) permettent de diversifier sur des centaines d'entreprises avec 50$ minimum. Rendement historique long terme : 7–10%/an."},
+          {label:"Immobilier locatif", detail:"Revenu mensuel régulier + valorisation du capital sur le long terme. Levier bancaire possible. Voir section dédiée."},
+          {label:"Obligations et dépôts à terme", detail:"Prêtez de l'argent à une entreprise ou une banque en échange d'intérêts fixes. Plus sûr que les actions, moins rentable. Adapté pour la partie 'sécurisée' du portefeuille."},
+          {label:"Actifs intellectuels", detail:"Cours, logiciels, marques, brevets, droits d'auteur. Coût de création fixe, revenus potentiellement illimités et très long terme."},
+          {label:"Construire un portefeuille diversifié", detail:"Ne jamais mettre tous ses œufs dans le même panier. Règle de base : âge en % d'obligations, reste en actions. À 30 ans : 30% obligations, 70% actions."},
+        ],
+        examples:[
+          {title:"Portefeuille simple pour débutant", detail:"50% ETF monde (actions) · 30% obligations · 10% or · 10% cash/livret épargne"},
+          {title:"Règle de l'âge en pourcentage", detail:"À 30 ans : 70% actions/30% sécurité · À 50 ans : 50%/50% · À 65 ans : 30%/70%"},
+        ],
+        warnings:["Éviter d'acheter des voitures, téléphones dernier cri ou équipements qui se déprécient en pensant 'investir'","Ne jamais investir ce que vous ne comprenez pas — si vous ne pouvez pas expliquer simplement, n'investissez pas"],
+        keyNumbers:[{label:"Rendement ETF historique", value:"7–10%/an"},{label:"Diversification minimale", value:"3 classes d'actifs"},{label:"Revue du portefeuille", value:"1–2×/an"}],
+        tip:"Un actif = quelque chose qui met de l'argent dans votre poche. Soyez impitoyable dans cette définition.",
+        fintrackLink:"Catégorisez vos revenus d'actifs séparément dans Revenus pour visualiser leur part croissante",
+      },
+      {
+        title:"Construire une entreprise",
+        tag:"Maximum", tagColor:C.amber, icon:"🚀",
+        description:"La voie la plus risquée et, statistiquement, la plus rentable pour s'enrichir.",
+        steps:[
+          {label:"Validez l'idée avant de créer", detail:"Vendez avant de produire. Si personne n'achète l'idée sur la base d'une description, personne n'achètera le produit fini. Un dépôt, une commande, un engagement écrit = validation."},
+          {label:"Résolvez un vrai problème douloureux", detail:"Les entreprises prospères suppriment une douleur réelle et mesurable. Plus la douleur est grande, plus le prix accepté est élevé. Cherchez ce que les gens détestent faire."},
+          {label:"Commencez avec le minimum viable", detail:"Pas besoin d'un bureau, d'employés ou d'un site parfait pour commencer. Un smartphone, une messagerie et une compétence suffisent pour les premières ventes."},
+          {label:"Réinvestissez massivement au début", detail:"Pendant les 2–3 premières années, réinvestissez 70–80% des profits dans la croissance. Votre rémunération viendra plus tard, mais sera décuplée."},
+          {label:"Construisez des systèmes, pas des emplois", detail:"Si votre entreprise ne peut pas fonctionner sans vous pendant 2 semaines, vous avez un emploi, pas une entreprise. Documentez, déléguez, automatisez."},
+          {label:"Pensez à la cession dès le premier jour", detail:"La richesse d'entreprise vient majoritairement de la revente (valorisation), pas du salaire prélevé. Construisez avec la question 'à combien pourrais-je vendre dans 10 ans ?'"},
+        ],
+        examples:[
+          {title:"Méthode de validation rapide", detail:"Créez une page de vente + un WhatsApp business. Si 10 personnes sur 100 contactées expriment un intérêt sérieux : idée viable."},
+          {title:"Valorisation d'une PME rentable", detail:"Une entreprise générant 500k/mois de bénéfice net peut se revendre 24–48× le bénéfice mensuel = 12–24M Ar"},
+        ],
+        warnings:["Ne jamais financer le démarrage avec des dettes à la consommation","Ne pas confondre revenus bruts et bénéfice net — une entreprise à 10M Ar de CA peut être déficitaire"],
+        keyNumbers:[{label:"Taux de survie à 5 ans", value:"50%"},{label:"Réinvestissement initial", value:"70–80%"},{label:"Valorisation PME", value:"24–48× bénéfice/mois"}],
+        tip:"La richesse d'entreprise vient de la valorisation à la cession, pas du salaire. Pensez à revendre dès le premier jour.",
+        fintrackLink:"Utilisez Suivi de Taf pour suivre vos pistes business, opportunités de partenariat et missions importantes",
+      },
+      {
+        title:"Mindset et psychologie de l'argent",
+        tag:"Essentiel", tagColor:C.purple, icon:"🧠",
+        description:"Les croyances limitantes sur l'argent sont la première cause d'échec financier — plus que le manque de revenus.",
+        steps:[
+          {label:"Identifiez vos croyances sur l'argent", detail:"'L'argent corrompt', 'les riches sont malhonnêtes', 'je ne mérite pas d'être riche', 'l'argent ne fait pas le bonheur'. Ces croyances sabotent inconsciemment vos décisions."},
+          {label:"L'argent est un outil, pas un but", detail:"Définissez précisément ce que l'argent vous permettra d'accomplir : liberté de temps, sécurité pour vos enfants, voyages, indépendance. La vision concrète maintient la discipline."},
+          {label:"Évitez l'inflation de style de vie", detail:"Chaque augmentation de revenus : augmentez d'abord votre épargne, ensuite (si nécessaire) votre niveau de vie. Beaucoup 'arrivent' à 30 ans avec un gros salaire et zéro épargne."},
+          {label:"Prenez des risques calculés", detail:"'Risque zéro' = croissance zéro. Évaluez chaque risque : quel est le pire scénario ? Pouvez-vous le supporter ? Si oui, prenez le risque."},
+          {label:"Entourez-vous de personnes avec les bons objectifs", detail:"Vous êtes la moyenne des 5 personnes que vous fréquentez le plus. Si votre entourage dépense tout, vous aussi. Cherchez des personnes qui investissent, créent, construisent."},
+          {label:"Éducation financière continue", detail:"Lisez un livre sur la finance personnelle par trimestre. Les 'fondamentaux' changent peu, mais les tactiques évoluent. Un investissement de 1h/semaine en apprentissage."},
+        ],
+        examples:[
+          {title:"Inflation de style de vie", detail:"Revenu passe de 500k à 800k → dépenses passent aussi à 800k → épargne reste à 0. Solution : versez les 300k de hausse directement en épargne."},
+          {title:"Test du risque calculé", detail:"Avant d'investir : 'Si je perds tout, que se passe-t-il ?' Si la réponse est 'je m'en remettrai', c'est un risque acceptable."},
+        ],
+        warnings:["Éviter de comparer sa trajectoire financière aux autres sur les réseaux sociaux — c'est une mise en scène","Ne pas confondre prendre des risques et jouer — le casino n'est pas un investissement"],
+        keyNumbers:[{label:"Lecture recommandée", value:"1 livre/trimestre"},{label:"Réseau positif", value:"5 personnes clés"},{label:"Revue des croyances", value:"1×/an"}],
+        tip:"Lisez : 'Père riche Père pauvre', 'La psychologie de l'argent', 'L'homme le plus riche de Babylone'. Trois livres qui changent une perspective.",
+        fintrackLink:"Créez des objectifs financiers précis et datés dans Objectifs pour ancrer votre vision dans le concret",
+      },
+    ],
+  },
+
+  {
+    id:"immobilier", label:"Immobilier", emoji:"🏠", color:C.teal,
+    subtitle:"L'investissement le plus accessible pour s'enrichir",
+    intro:"L'immobilier reste la voie d'enrichissement la plus empruntée par la classe moyenne mondiale. Accessible avec des revenus modestes grâce au levier bancaire.",
+    articles:[
+      {
+        title:"Les fondamentaux de l'investissement immobilier",
+        tag:"Bases", tagColor:C.teal, icon:"📐",
+        description:"Avant d'acheter quoi que ce soit, maîtriser ces 6 concepts vous évitera des erreurs coûteuses.",
+        steps:[
+          {label:"Le rendement brut", detail:"Loyer annuel ÷ Prix d'achat total × 100. Exemple : loyer 120 000/mois = 1 440 000/an ÷ 18 000 000 Ar = 8% brut. Visez minimum 6–7% en zone urbaine."},
+          {label:"Le rendement net", detail:"(Loyer annuel − charges − impôts − provisions) ÷ Prix total. Généralement 1,5–3 points de moins que le brut. Le rendement net RÉEL est ce qui compte."},
+          {label:"Le cash-flow mensuel", detail:"Loyer encaissé − remboursement crédit − charges − impôts. Doit être positif ou au minimum neutre. Un cash-flow négatif signifie que vous subventionnez vous-même votre locataire."},
+          {label:"L'effet de levier bancaire", detail:"Vous achetez un bien de 50M Ar avec 10M Ar d'apport. Si le bien prend 10% de valeur, vous avez gagné 5M Ar sur 10M investis = 50% de rendement sur votre mise, pas 10%."},
+          {label:"La provision pour travaux et vacance", detail:"Réservez 5–10% des loyers annuels pour les travaux et les périodes sans locataire. Ne pas prévoir ça est la première erreur des débutants."},
+          {label:"L'emplacement avant tout", detail:"Un bien moyen dans un bon emplacement surperforme toujours un beau bien dans un mauvais emplacement. Transports, commerces, sécurité, évolution du quartier."},
+        ],
+        examples:[
+          {title:"Calcul rapide d'un appartement", detail:"Loyer 200k/mois · Prix 24M Ar · Charges 30k/mois · Crédit 120k/mois → Cash-flow : 200k−120k−30k = +50k/mois"},
+          {title:"Effet de levier en pratique", detail:"Apport 10M · Bien 50M · Valeur après 5 ans : 60M · Plus-value : +10M sur 10M investis = +100% de rendement sur mise"},
+        ],
+        warnings:["Ne jamais acheter sur un coup de cœur — calculez le rendement AVANT de visiter","Attention aux frais cachés : notaire, agence, travaux, impôts fonciers"],
+        keyNumbers:[{label:"Rendement brut minimum", value:"6–7%"},{label:"Provision vacance", value:"5–10%"},{label:"Apport recommandé", value:"20–30%"}],
+        tip:"Ne jamais acheter en émotionnel. Calculez le rendement brut avant même de visiter.",
+        fintrackLink:"Suivez vos revenus locatifs dans Revenus → créez une catégorie 'Immobilier' dédiée",
+      },
+      {
+        title:"Premier investissement immobilier",
+        tag:"Démarrage", tagColor:C.green, icon:"🔑",
+        description:"Comment acheter son premier bien même avec peu de capital.",
+        steps:[
+          {label:"Constituez un apport de 20–30%", detail:"Les banques exigent généralement 20–30% d'apport. Sur un bien à 15M Ar, il faut 3–4,5M Ar d'épargne préalable. Votre fonds d'urgence est séparé et ne compte pas."},
+          {label:"Commencez par un petit bien", detail:"Studio, T1, local commercial petit format. Les grosses opérations peuvent attendre d'avoir acquis de l'expérience. Moins de risque, apprentissage plus rapide."},
+          {label:"Faites vos calculs avant chaque visite", detail:"Définissez vos critères de rendement minimum AVANT de voir le bien. La visite crée de l'émotion qui brouille le jugement."},
+          {label:"Négociez le prix", detail:"Le prix affiché est toujours négociable. 5–15% de remise est courant. Argumentez avec les défauts du bien, les prix du marché, la rapidité de votre décision."},
+          {label:"Gérez personnellement au début", detail:"La gestion locative par agence coûte 8–12% des loyers. Gérez vous-même pour maximiser le rendement au départ et comprendre les mécanismes."},
+          {label:"Réinvestissez dans un deuxième bien", detail:"Une fois le crédit du premier bien partiellement remboursé et la valeur du bien appréciée, refinancez pour obtenir un apport et acheter un deuxième bien."},
+        ],
+        examples:[
+          {title:"Stratégie sur 10 ans", detail:"Bien 1 à 15M (2025) → remboursé + valorisé → refinancement → Bien 2 à 25M (2030) → et ainsi de suite"},
+          {title:"Location meublée vs vide", detail:"Meublé : loyer +20–30% mais rotation plus fréquente · Vide : stabilité, moins de gestion · Selon la zone et la demande"},
+        ],
+        warnings:["Ne jamais acheter à crédit un bien dont le loyer ne couvre pas les mensualités","Attention aux promesses de 'rendements garantis' — ça n'existe pas en immobilier"],
+        keyNumbers:[{label:"Apport minimum", value:"20–30%"},{label:"Négociation prix", value:"5–15%"},{label:"Gestion agence", value:"8–12% loyers"}],
+        tip:"Commencez petit, apprenez, puis montez en gamme. Chaque bien acheté est une formation qui vaut des millions.",
+        fintrackLink:"Créez un objectif 'Apport immobilier' dans Objectifs avec une date cible pour planifier votre premier achat",
+      },
+      {
+        title:"Immobilier locatif à Madagascar",
+        tag:"Madagascar", tagColor:C.pink, icon:"🇲🇬",
+        description:"Spécificités, opportunités et pièges du marché immobilier malgache.",
+        steps:[
+          {label:"Comprendre la dualité du marché", detail:"Marché formel (titres fonciers, agences) vs marché informel (terrains sans titre, accords oraux). Le marché formel est plus sûr mais plus cher. Ne jamais acheter sans titre foncier vérifié."},
+          {label:"Zones à fort potentiel locatif", detail:"Antananarivo : Analakely, Isoraka, Behoririka, Ampasanimalo (logements étudiants et salariés). Autres villes : zones proches des zones industrielles, marchés, bureaux gouvernementaux."},
+          {label:"Vérification juridique obligatoire", detail:"Vérifiez le titre foncier à la conservation foncière. Vérifiez qu'il n'y a pas d'hypothèque, litige ou indivision. Faites appel à un notaire ou un avocat spécialisé."},
+          {label:"Localisation par rapport aux ONG et expatriés", detail:"Les ONG et entreprises étrangères cherchent des logements sécurisés, bien situés. Loyers 3–5× supérieurs aux standards locaux. Marché de niche mais très rentable."},
+          {label:"La colocation étudiante", detail:"Près des universités (Ankatso, Vontovorona), une maison subdivisée en chambres loue 2× plus cher au m² qu'un logement familial. Demande forte, rotation élevée."},
+          {label:"Coûts à anticiper", detail:"Gardiennage : 100–200k/mois · Entretien annuel : 3–5% valeur bien · Impôts fonciers · Eau et électricité si meublé-tout-inclus."},
+        ],
+        examples:[
+          {title:"Maison en colocation étudiante à Ankatso", detail:"4 chambres × 80k/mois = 320k/mois vs location familiale = 180k/mois · Rendement supérieur mais gestion plus intensive"},
+          {title:"Appartement pour expatrié", detail:"T2 sécurisé, Isoraka, bien équipé : 500–800 USD/mois = 2 250 000–3 600 000 Ar contre 300–400k pour un local"},
+        ],
+        warnings:["Jamais d'achat sans titre foncier vérifié en personne à la conservation foncière","Méfiance des intermédiaires qui proposent 'des terrains pas chers dans une belle zone' sans documentation"],
+        keyNumbers:[{label:"Vérification obligatoire", value:"Titre foncier"},{label:"Marché expatrié", value:"3–5× loyer local"},{label:"Gardiennage mensuel", value:"100–200k Ar"}],
+        tip:"Le titre foncier est la seule sécurité juridique en immobilier malgache. Ne faites pas l'impasse.",
+        fintrackLink:"Créez une catégorie 'Revenus immobiliers' dans Revenus et trackez chaque bien séparément",
+      },
+    ],
+  },
+
+  {
+    id:"remote", label:"Travailler à distance", emoji:"🌐", color:C.blue,
+    subtitle:"Accéder aux revenus internationaux depuis Madagascar",
+    intro:"La distance n'est plus un obstacle. Depuis Madagascar, il est possible d'accéder aux salaires et tarifs du marché mondial avec une connexion internet et les bonnes compétences.",
+    articles:[
+      {
+        title:"Compétences les plus demandées à l'international",
+        tag:"Opportunités", tagColor:C.blue, icon:"🎯",
+        description:"Les compétences qui permettent de travailler pour des clients mondiaux depuis n'importe où.",
+        steps:[
+          {label:"Développement web et mobile", detail:"React, Node.js, Python, Flutter. Salaires : 25–80$/h. Formation : 6–18 mois. Ressources gratuites : freeCodeCamp, The Odin Project, Codecademy."},
+          {label:"Design UI/UX", detail:"Figma, Adobe XD, design systems. Salaires : 20–60$/h. Formation : 3–8 mois. Portfolio sur Behance ou Dribbble indispensable."},
+          {label:"Data science et IA", detail:"Python, SQL, machine learning. Salaires : 30–100$/h. Formation : 9–24 mois. Kaggle pour pratiquer, Coursera pour les certifications reconnues."},
+          {label:"Marketing digital", detail:"SEO, Google Ads, Facebook Ads, email marketing. Salaires : 15–40$/h. Certifications Google Ads et HubSpot gratuites et reconnues."},
+          {label:"Rédaction et copywriting", detail:"Francophone natif + anglais = avantage concurrentiel. Rédaction SEO, copywriting pub, traduction. 0,05–0,20$/mot selon spécialisation."},
+          {label:"Compétences back-office", detail:"Comptabilité internationale, assistanat virtuel, support client bilingue. Entrée plus facile, salaires moins élevés mais accessible rapidement."},
+        ],
+        examples:[
+          {title:"Développeur junior débutant", detail:"Mois 1–6 : formation gratuite · Mois 6–12 : missions 15$/h × 10h/sem = 600$/mois · Mois 12+ : 25$/h × 20h = 2 000$/mois"},
+          {title:"Designer UI après 6 mois", detail:"Portfolio 10 projets → Fiverr/Upwork → 800–2 000$/mois en 8–12 mois d'effort constant"},
+        ],
+        warnings:["Ne pas choisir une compétence uniquement pour le salaire — si vous ne l'aimez pas, vous abandonnerez avant d'être compétent","Éviter les formations payantes sans certifications reconnues — beaucoup de contenu équivalent existe gratuitement"],
+        keyNumbers:[{label:"Dev junior", value:"15–30$/h"},{label:"Dev senior", value:"50–100$/h"},{label:"Designer UI", value:"20–60$/h"}],
+        tip:"Choisissez une compétence que vous pouvez pratiquer chaque jour. La régularité sur 12 mois vaut plus que n'importe quel talent naturel.",
+        fintrackLink:"Utilisez Suivi de Taf pour tracker vos candidatures internationales et les plateformes testées",
+      },
+      {
+        title:"Recevoir des paiements internationaux",
+        tag:"Pratique", tagColor:C.amber, icon:"💳",
+        description:"La solution aux obstacles bancaires pour les freelances et travailleurs à distance malgaches.",
+        steps:[
+          {label:"PayPal (solution de base)", detail:"Accepté sur la plupart des plateformes. Permet de recevoir et d'envoyer des paiements. Conversion en Ariary possible via des intermédiaires locaux ou des transferts Western Union."},
+          {label:"Wise (anciennement TransferWise)", detail:"Compte bancaire en USD/EUR/GBP réel. Frais réduits (0,5–1,5% vs 3–5% pour les banques). Idéal pour les clients qui paient par virement bancaire."},
+          {label:"Payoneer", detail:"Très utilisé sur Upwork, Fiverr, Amazon. Carte Mastercard physique utilisable au distributeur. Standard de facto pour les freelances des marchés émergents."},
+          {label:"Intermédiaires locaux", detail:"Des services permettent de convertir vos PayPal/Wise en MGA directement en mobile money (MVola, Orange Money). Commission : 3–7%. Pratique mais vérifiez la réputation."},
+          {label:"Déclarer vos revenus", detail:"Les revenus d'activités à l'étranger sont en principe imposables selon le statut fiscal malgache. Consultez un comptable pour minimiser légalement la charge fiscale."},
+          {label:"Ouvrir un compte en devise étrangère", detail:"Certaines banques malgaches (BFV-SG, BNI) proposent des comptes USD/EUR. Utile pour garder des devises sans conversion immédiate quand le taux est défavorable."},
+        ],
+        examples:[
+          {title:"Parcours type de paiement", detail:"Client US paie sur Upwork → Payoneer (frais 2%) → Virement banque locale (frais 1%) → MGA = arrivée en 3–5 jours ouvrés"},
+          {title:"Comparaison des frais sur 1 000$", detail:"Banque classique : 50$ de frais · Wise : 10$ · Payoneer : 20$ · Différence annualisée sur 12 000$ : 480$ économisés avec Wise"},
+        ],
+        warnings:["Évitez les services non officiels qui 'vendent des PayPal' — risque de fraude élevé","Ne pas laisser de grosses sommes en devise dans des portefeuilles en ligne — transférez régulièrement"],
+        keyNumbers:[{label:"Frais Wise", value:"0,5–1,5%"},{label:"Frais Payoneer", value:"2%"},{label:"Frais banque classique", value:"3–5%"}],
+        tip:"Wise ou Payoneer réduisent vos frais de conversion de 60–80% par rapport aux banques classiques. L'économie est significative sur le long terme.",
+        fintrackLink:"Enregistrez vos revenus internationaux en devise d'origine dans Revenus — FinTrack gère les conversions automatiquement",
+      },
+      {
+        title:"Remote work salarié : CDI à distance",
+        tag:"Emploi stable", tagColor:C.green, icon:"🏡",
+        description:"Obtenir un emploi salarié à temps plein pour une entreprise étrangère depuis Madagascar.",
+        steps:[
+          {label:"Cibler les entreprises remote-friendly", detail:"GitLab, Automattic, Zapier, Basecamp ont des politiques 100% remote mondiales. Les startups tech européennes et américaines recrutent aussi à l'étranger. Cherchez 'remote' + 'worldwide' + votre compétence."},
+          {label:"Optimiser son profil LinkedIn", detail:"Titre clair, résumé en anglais, projets visibles, recommandations. Mentionnez explicitement 'Available for remote work' et votre timezone (EAT/UTC+3)."},
+          {label:"Adapter son CV au format international", detail:"1 page, en anglais, format ATS-compatible (simple, sans image). Résultats quantifiés ('reduced load time by 40%' plutôt que 'amélioré les performances')."},
+          {label:"Se préparer aux entretiens à distance", detail:"Connexion stable, fond propre, éclairage correct, microphone correct. Les entreprises remote cherchent une communication claire par écrit autant que les compétences techniques."},
+          {label:"Négocier en tenant compte de votre coût de vie", detail:"Un salaire de 2 000$/mois représente un pouvoir d'achat bien supérieur à Madagascar qu'à Paris. Négociez sur votre valeur marché, pas sur votre coût de vie."},
+          {label:"Contrat et statut légal", detail:"La plupart des entreprises étrangères paient en tant que 'contractor' (freelance). Demandez à votre comptable comment structurer cela optimalement en droit malgache."},
+        ],
+        examples:[
+          {title:"Développeur malgache en remote CDI", detail:"Salaire 2 500$/mois = ~11 250 000 Ar/mois · Charges locales faibles → Capacité d'épargne 60–70% du revenu"},
+          {title:"Plateforme de recherche", detail:"LinkedIn Remote Jobs, We Work Remotely, Remote.co, Workana (hispanophone), Himalayas.app"},
+        ],
+        warnings:["Vérifiez la légalité du contrat selon la législation malgache avant de signer","Attention aux fuseaux horaires — travailler pour une entreprise US signifie souvent des réunions tard le soir"],
+        keyNumbers:[{label:"Salaire remote junior dev", value:"1 500–3 000$/mois"},{label:"Fuseau horaire Madagascar", value:"UTC+3 (EAT)"},{label:"Économies possibles", value:"60–70% du salaire"}],
+        tip:"Un salaire remote international combiné au coût de vie malgache crée une capacité d'épargne exceptionnelle. C'est le levier le plus puissant disponible.",
+        fintrackLink:"Enregistrez votre salaire en devise dans Revenus — suivez son évolution mensuelle convertie en MGA",
+      },
+    ],
+  },
+
+  {
+    id:"gerer", label:"Gérer son argent", emoji:"⚖️", color:C.purple,
+    subtitle:"Organiser, protéger et piloter ses finances au quotidien",
+    intro:"Gagner et économiser ne suffisent pas si la gestion est chaotique. Ces systèmes font la différence entre se débrouiller et prospérer durablement.",
+    articles:[
+      {
+        title:"Le bilan financier mensuel",
+        tag:"Pilotage", tagColor:C.teal, icon:"📋",
+        description:"30 minutes par mois pour une vision complète de votre situation financière réelle.",
+        steps:[
+          {label:"Revenus vs dépenses : le résultat du mois", detail:"Total encaissé (tous revenus confondus) vs total dépensé. La différence = votre taux d'épargne réel ce mois. Pas un objectif — une mesure."},
+          {label:"Comparaison mois précédent", detail:"Plus ou moins qu'en M-1 ? Identifiez les postes qui ont bougé. Une hausse des dépenses 'loisirs' en décembre est normale. En mars, c'est à investiguer."},
+          {label:"Vérification des objectifs", detail:"Êtes-vous en avance ou en retard sur chaque objectif d'épargne ? Calculez le gap entre prévu et réalisé. Ajustez le plan pour le mois suivant."},
+          {label:"Revue des abonnements actifs", detail:"Une fois par trimestre minimum : passez en revue tous les prélèvements récurrents. Supprimez ceux que vous n'utilisez plus sans y penser."},
+          {label:"Mise à jour de la valeur nette", detail:"Actifs (épargne + investissements + biens immobiliers) moins Dettes (crédits en cours). Ce chiffre doit augmenter d'une année sur l'autre."},
+          {label:"Planification du mois suivant", detail:"Quelles dépenses inhabituelles arrivent le mois prochain ? Anniversaires, impôts, rentrée scolaire ? Provisionnez maintenant."},
+        ],
+        examples:[
+          {title:"Tableau de bord mensuel simple", detail:"Revenus : 800k · Dépenses fixes : 450k · Dépenses variables : 200k · Épargne réalisée : 150k → Taux : 18,75%"},
+          {title:"Valeur nette trimestrielle", detail:"Épargne : 5M · Véhicule : 3M · Objectifs investis : 2M · Crédit voiture : -4M → Valeur nette : +6M"},
+        ],
+        warnings:["Ne pas confondre solde bancaire et réalité financière — le compte peut être positif mais les dettes cachées sont énormes","Ne pas sauter la revue parce qu'un mois s'est mal passé — surtout ces mois-là, la revue est nécessaire"],
+        keyNumbers:[{label:"Temps nécessaire", value:"30 min/mois"},{label:"Fréquence revue valeur nette", value:"1×/trimestre"},{label:"Jour recommandé", value:"1er du mois"}],
+        tip:"Faites-le le 1er de chaque mois, toujours à la même heure. La régularité prime sur la perfection.",
+        fintrackLink:"Le tableau de bord FinTrack affiche vos KPIs automatiquement. Ouvrez-le chaque 1er du mois et vérifiez les 4 indicateurs.",
+      },
+      {
+        title:"Protéger ses revenus et son patrimoine",
+        tag:"Sécurité", tagColor:C.red, icon:"🔒",
+        description:"Ce qui n'est pas protégé peut disparaître en un événement. La protection précède l'enrichissement.",
+        steps:[
+          {label:"Assurance santé : priorité absolue", detail:"Une hospitalisation sérieuse sans assurance peut effacer des années d'épargne en quelques jours. Même une mutuelle basique est infiniment préférable à rien."},
+          {label:"Diversifier les sources de revenus", detail:"Si vous avez une seule source de revenus, un licenciement, une maladie ou un problème de client unique = catastrophe financière totale. Minimum 2 sources."},
+          {label:"Sécurité numérique", detail:"Gestionnaire de mots de passe (Bitwarden, gratuit). Authentification 2 facteurs sur tous les comptes financiers. Ne jamais partager identifiants ou codes OTP."},
+          {label:"Documents importants : copies multiples", detail:"Titre foncier, contrats de travail, contrats d'assurance, relevés d'identité bancaire. Copies papier + copies numériques dans le cloud."},
+          {label:"Planifier la transmission", detail:"Si vous avez des biens, un testament ou des dispositions claires évitent des conflits familiaux et des pertes juridiques importantes. Voyez un notaire."},
+          {label:"Prudence avec les prêts personnels", detail:"Prêter à un ami ou de la famille est généralement une donation déguisée. Si vous prêtez, ne prêtez que ce que vous pouvez vous permettre de perdre."},
+        ],
+        examples:[
+          {title:"Impact d'une hospitalisation sans assurance", detail:"3 jours en clinique privée : 500k–2M Ar · Chirurgie : 3M–15M Ar · Une assurance à 50k/mois prévient un désastre de 5–15M"},
+          {title:"Diversification revenus minimale", detail:"Revenu principal (emploi) + 1 revenu secondaire (freelance ou location) = moins 50% de vulnérabilité en cas de perte d'emploi"},
+        ],
+        warnings:["Ne pas ignorer les petits risques qui s'accumulent — une assurance santé semble inutile jusqu'au moment où elle ne l'est pas","Ne jamais mélanger son fonds d'urgence et son épargne investie"],
+        keyNumbers:[{label:"Assurance santé mini", value:"40–80k Ar/mois"},{label:"Sources revenus min.", value:"2"},{label:"Fonds urgence avant tout", value:"3–6 mois"}],
+        tip:"Calculez ce qui se passerait si vous perdiez votre revenu principal demain. Si la réponse vous effraie, agissez maintenant.",
+        fintrackLink:"Votre fonds d'urgence dans Objectifs est votre premier rempart contre ce scénario",
+      },
+      {
+        title:"Éviter les pièges financiers classiques",
+        tag:"Prudence", tagColor:C.amber, icon:"⚠️",
+        description:"Ces erreurs ruinent des années de travail. Les connaître permet de les anticiper.",
+        steps:[
+          {label:"Dettes à la consommation : l'ennemi n°1", detail:"Crédit revolving, achats 'en plusieurs fois', découvert permanent. Le taux d'intérêt réel peut dépasser 20–30%/an. Remboursez ces dettes avant tout investissement."},
+          {label:"Les arnaques d'investissement", detail:"'Doublez votre argent en 30 jours', MLM avec rendements garantis, crypto 'sûre' proposée par un inconnu. La règle d'or : si c'est trop beau, c'est une arnaque. Sans exception."},
+          {label:"L'achat émotionnel et social", detail:"Voiture pour impressionner, téléphone dernier cri payé à crédit, vacances sur prêt. Avant chaque grosse dépense : attendez 72h. L'envie passe souvent."},
+          {label:"Investir ce qu'on ne comprend pas", detail:"Crypto, options, forex, trading court terme. 80–90% des traders particuliers perdent de l'argent à long terme. Si vous ne comprenez pas, n'investissez pas."},
+          {label:"Ignorer les petites fuites", detail:"5 000 Ar/jour 'pour rien' = 150 000 Ar/mois = 1 800 000 Ar/an. Les petites dépenses répétitives sont souvent le plus gros poste de gaspillage."},
+          {label:"Prêter des garanties sans comprendre", detail:"Se porter garant pour un tiers sur un crédit = s'engager à rembourser si cette personne ne peut pas. Des familles ont perdu leurs biens pour avoir dit oui trop vite."},
+        ],
+        examples:[
+          {title:"Coût réel d'un crédit conso à 24%", detail:"Emprunt 500k Ar sur 12 mois à 24%/an → Remboursez 568k Ar · 68k Ar de 'prime' pour avoir dépensé avant d'avoir"},
+          {title:"Test des 72h", detail:"Envie d'un téléphone à 800k → Attendez 3 jours → 70% du temps l'envie s'est calmée → 800k conservés"},
+        ],
+        warnings:["Méfiance de quiconque promet un rendement garanti et supérieur à 15%/an — c'est toujours une arnaque ou un risque extrême","Ne jamais se porter garant sans avoir lu l'intégralité du contrat"],
+        keyNumbers:[{label:"Taux crédit conso moyen", value:"18–30%/an"},{label:"Traders qui perdent", value:"80–90%"},{label:"Règle de l'attente", value:"72h minimum"}],
+        tip:"Avant chaque achat important : 'Est-ce que ça me rapproche ou m'éloigne de mes objectifs financiers ?'",
+        fintrackLink:"Configurez des alertes budget dans l'onglet Budget pour être averti avant de dépasser une limite",
+      },
+      {
+        title:"Planifier les grands événements de vie",
+        tag:"Anticipation", tagColor:C.indigo, icon:"🎯",
+        description:"Les dépenses prévisibles ne doivent jamais vous surprendre. Elles se planifient des mois ou des années à l'avance.",
+        steps:[
+          {label:"Dressez la liste de vos grands événements", detail:"Mariage, naissance, scolarité des enfants, achat voiture, rénovation maison, retraite. Mettez une date approximative et un montant estimé sur chacun."},
+          {label:"Calculez l'épargne mensuelle nécessaire", detail:"Montant cible ÷ nombre de mois jusqu'à l'événement = virement mensuel nécessaire. Un mariage à 5M Ar dans 3 ans = 139 000 Ar/mois à mettre de côté."},
+          {label:"Un compte dédié par grand projet", detail:"Ne mélangez jamais l'épargne projets avec votre fonds d'urgence ou votre épargne courante. Un compte (ou sous-objectif) distinct par grand projet."},
+          {label:"Anticipez les dépenses saisonnières", detail:"Noël, vacances scolaires, rentrée, fêtes. Divisez le coût annuel par 12 et épargnez chaque mois. La rentrée ne doit jamais vous prendre par surprise."},
+          {label:"Révisez le plan chaque trimestre", detail:"Les événements se déplacent, les montants changent. Ajustez les virements en conséquence. Mieux vaut ajuster tôt que se retrouver à court."},
+          {label:"Assurez les événements critiques", detail:"Pour les projets très importants (retraite, études des enfants), complétez l'épargne par une assurance-vie ou un placement sécurisé dédié."},
+        ],
+        examples:[
+          {title:"Budget mariage planifié 2 ans à l'avance", detail:"Cible 4M Ar ÷ 24 mois = 167k/mois épargné · Arrivée : fonds constitués, pas de dette"},
+          {title:"Rentrée scolaire 3 enfants", detail:"Coût estimé 600k/rentrée ÷ 12 mois = 50k/mois en compte dédié → plus de stress en septembre"},
+        ],
+        warnings:["Ne pas emprunter pour financer un mariage ou des vacances — commencez plus modestement si nécessaire","Ne pas utiliser l'épargne projets pour 'dépanner' le quotidien"],
+        keyNumbers:[{label:"Calcul mensuel", value:"Cible ÷ mois"},{label:"Comptes dédiés", value:"1 par projet"},{label:"Revue", value:"1×/trimestre"}],
+        tip:"Les dépenses de Noël, les vacances, les impôts : divisez leur coût par 12 et épargnez chaque mois. Elles ne vous surprendront plus jamais.",
+        fintrackLink:"Créez un objectif par grand projet dans Objectifs avec une date cible et un montant — FinTrack calcule automatiquement l'effort mensuel",
+      },
+    ],
+  },
+
+  // ── SECTION : SORTIR DES DETTES ──────────────────────────────────────────
+  {
+    id: "dettes",
+    label: "Sortir des dettes",
+    emoji: "⛓️",
+    color: "#EF4444",
+    subtitle: "Un plan concret pour se libérer, étape par étape",
+    intro: "Les dettes ne sont pas une fatalité. Des millions de personnes s'en sont sorties en appliquant des méthodes précises. Ce n'est pas rapide, mais c'est possible — et chaque action compte.",
+    articles: [
+      {
+        title: "Faire le point honnêtement",
+        tag: "Étape 1 — Indispensable",
+        tagColor: "#EF4444",
+        icon: "📋",
+        description: "On ne peut pas combattre ce qu'on ne voit pas. Dresser la liste complète est l'acte de courage le plus important.",
+        steps: [
+          { label: "Listez chaque dette sans exception", detail: "Crédit bancaire, avance sur salaire, dette familiale, marchand à qui vous devez, micro-crédit. Tout. Sans jugement. Sur papier ou dans FinTrack." },
+          { label: "Pour chaque dette, notez 4 choses", detail: "Montant total restant dû / Taux d'intérêt ou frais mensuels / Montant du remboursement mensuel minimum / Date d'échéance si elle existe." },
+          { label: "Calculez votre dette totale", detail: "Le chiffre peut faire peur. C'est normal. Ce n'est pas un jugement sur vous — c'est simplement le point de départ de votre plan." },
+        ],
+        tip: "Beaucoup de gens sous-estiment leurs dettes de 30 à 50% parce qu'ils en oublient certaines. Prenez le temps de tout lister. Un seul oubli peut fausser tout le plan.",
+        keyNumbers: [
+          { label: "Temps pour faire le bilan", value: "2h max" },
+          { label: "Dettes souvent oubliées", value: "Famille & amis" },
+          { label: "Première règle", value: "Ne rien cacher" },
+        ],
+        warnings: [
+          "Ne pas ignorer les petites dettes — elles ont souvent les taux les plus élevés",
+          "Ne pas emprunter pour rembourser sans comparer les taux — parfois ça aggrave la situation",
+        ],
+        fintrackLink: "Créez une transaction récurrente de type dépense 'Remboursement dette [nom]' pour chaque dette — vous visualiserez leur part dans votre budget",
+      },
+      {
+        title: "Stopper l'hémorragie immédiatement",
+        tag: "Étape 2 — Urgent",
+        tagColor: "#F97316",
+        icon: "🚨",
+        description: "Avant de rembourser, il faut arrêter de s'endetter davantage. Sans ça, vous courrez après l'eau avec un seau percé.",
+        steps: [
+          { label: "Identifiez ce qui crée de nouvelles dettes", detail: "Dépenses récurrentes payées par découvert, achats sur crédit, emprunts pour couvrir des manques. Chacun de ces mécanismes doit être coupé." },
+          { label: "Réduisez les dépenses au minimum vital", detail: "Pendant la phase de remboursement intensif : loyer, alimentation de base, transport, santé. Tout le reste est suspendu temporairement." },
+          { label: "Constituez un micro-fonds d'urgence", detail: "Avant de rembourser massivement, mettez 100 000 à 300 000 Ar de côté intouchables. Ce coussin évite de recréer une dette à la première dépense imprévue." },
+        ],
+        tip: "Le piège le plus courant : rembourser 200 000 Ar de dette le 5 du mois, puis en recréer 150 000 Ar le 20. Le solde réel ne bouge presque pas. Stopez d'abord les fuites.",
+        keyNumbers: [
+          { label: "Micro-fonds d'urgence cible", value: "100–300k Ar" },
+          { label: "Dépenses à couper d'abord", value: "Loisirs & abonnements" },
+          { label: "Objectif phase urgence", value: "Zéro nouvelle dette" },
+        ],
+        warnings: [
+          "Ne pas fermer tous les crédits en même temps si ça crée un découvert — planifiez l'ordre",
+          "Ne pas vendre un bien de valeur dans la panique sans avoir calculé si c'est vraiment nécessaire",
+        ],
+        fintrackLink: "Utilisez l'onglet Budget pour plafonner chaque catégorie de dépense — FinTrack vous alertera visuellement si vous dépassez",
+      },
+      {
+        title: "Méthode Avalanche — La plus efficace mathématiquement",
+        tag: "Stratégie A",
+        tagColor: "#6366F1",
+        icon: "🏔️",
+        description: "Rembourser d'abord la dette au taux le plus élevé. Vous payez moins d'intérêts au total.",
+        steps: [
+          { label: "Classez vos dettes par taux d'intérêt décroissant", detail: "La dette la plus chère en premier — celle qui coûte le plus cher chaque mois même si vous ne payez que le minimum." },
+          { label: "Payez le minimum sur toutes", detail: "Sur toutes les dettes sauf la première — vous payez le strict minimum pour ne pas être en défaut." },
+          { label: "Concentrez tout le surplus sur la dette n°1", detail: "Chaque ariary disponible au-delà des minimums va sur cette seule dette jusqu'à extinction totale. Ensuite on passe à la suivante." },
+        ],
+        tip: "Exemple : 3 dettes à 5%, 12% et 28%/an. L'avalanche attaque le 28% en premier. Sur 24 mois, vous pouvez économiser 20 à 40% d'intérêts par rapport à un remboursement au hasard.",
+        keyNumbers: [
+          { label: "Économie d'intérêts vs hasard", value: "20–40%" },
+          { label: "Meilleure méthode si", value: "Taux élevés" },
+          { label: "Effort psychologique", value: "Élevé" },
+        ],
+        warnings: [
+          "Nécessite de la discipline — les résultats visibles peuvent prendre du temps",
+          "Si la motivation flanche, passez à la méthode Boule de neige",
+        ],
+        fintrackLink: "Créez un objectif 'Extinction dette [nom]' pour suivre le remboursement de votre dette prioritaire",
+      },
+      {
+        title: "Méthode Boule de neige — La plus motivante",
+        tag: "Stratégie B",
+        tagColor: "#3B82F6",
+        icon: "⛄",
+        description: "Rembourser d'abord la plus petite dette. Les victoires rapides alimentent la motivation.",
+        steps: [
+          { label: "Classez vos dettes par montant croissant", detail: "La plus petite en premier, indépendamment du taux. L'objectif est de la liquider rapidement pour libérer de la trésorerie." },
+          { label: "Payez le minimum sur tout sauf la plus petite", detail: "Sur cette première dette, concentrez tout votre surplus disponible. Elle disparaît en semaines, pas en années." },
+          { label: "Recyclez le montant libéré sur la suivante", detail: "Quand la petite est terminée, ajoutez ce que vous y versiez à la suivante. La somme disponible grossit — comme une boule de neige." },
+        ],
+        tip: "Rembourser une dette complètement déclenche un effet psychologique puissant. Ça prouve que c'est possible. Cette émotion vaut souvent plus que la différence mathématique avec l'avalanche.",
+        keyNumbers: [
+          { label: "Victoire rapide en", value: "1–3 mois" },
+          { label: "Meilleure méthode si", value: "Motivation faible" },
+          { label: "Coût vs Avalanche", value: "Légèrement plus cher" },
+        ],
+        warnings: [
+          "Mathématiquement sous-optimale si les taux sont très différents",
+          "Ne pas célébrer trop tôt — restez concentré jusqu'à la dernière dette",
+        ],
+        fintrackLink: "Créez un objectif par dette classée du plus petit au plus grand — cochez-les au fur et à mesure",
+      },
+      {
+        title: "Négocier avec ses créanciers",
+        tag: "Levier souvent ignoré",
+        tagColor: "#10B981",
+        icon: "🤝",
+        description: "La plupart des créanciers préfèrent un accord partiel à un non-paiement total. C'est négociable.",
+        steps: [
+          { label: "Appelez avant d'être en défaut", detail: "Dès que vous savez que vous ne pourrez pas payer, contactez le créancier. Un client qui appelle est toujours mieux traité qu'un client qui disparaît." },
+          { label: "Demandez un rééchelonnement", detail: "\"Je traverse une période difficile, puis-je payer X pendant 6 mois au lieu de Y ?\" Beaucoup acceptent sans frais supplémentaires." },
+          { label: "Proposez un solde de tout compte", detail: "Si vous avez une somme disponible, proposez 60–70% du montant dû en règlement définitif. Les banques et créanciers acceptent souvent pour les dossiers anciens." },
+        ],
+        tip: "Toujours demander par écrit et faire confirmer par écrit. Un accord oral ne vaut rien. Exigez systématiquement une confirmation écrite ou un email.",
+        keyNumbers: [
+          { label: "Taux d'acceptation négociation", value: "40–70%" },
+          { label: "Réduction solde de tout compte", value: "20–50%" },
+          { label: "Délai avant contact", value: "0 jour — immédiat" },
+        ],
+        warnings: [
+          "Ne jamais signer un accord sans le lire intégralement",
+          "Ne pas confondre rééchelonnement (délai) et annulation (effacement) — ce sont deux choses très différentes",
+          "Méfiance des sociétés de 'rachat de dettes' qui promettent des miracles contre des frais élevés",
+        ],
+        fintrackLink: "Mettez à jour le montant restant dû dans vos récurrences après chaque accord pour garder une vue précise",
+      },
+      {
+        title: "Augmenter ses revenus pour rembourser plus vite",
+        tag: "Accélérateur",
+        tagColor: "#F59E0B",
+        icon: "🚀",
+        description: "Réduire les dépenses a une limite. Augmenter les revenus, non. Chaque ariary supplémentaire va directement sur la dette.",
+        steps: [
+          { label: "Engagez-vous à reverser 100% des revenus supplémentaires", detail: "Pas 50%, pas 80%. 100%. Toute prime, tout bonus, toute mission freelance supplémentaire va directement en remboursement. Sans exception." },
+          { label: "Identifiez une source rapide à activer", detail: "Mission freelance urgente, vente d'objets inutilisés, heures supplémentaires, petit service local. L'objectif est du cash rapide, pas une solution permanente." },
+          { label: "Calculez l'impact", detail: "50 000 Ar/mois de revenus supplémentaires sur une dette à 20%/an peuvent réduire la durée de remboursement de 30 à 40%." },
+        ],
+        tip: "Vendez ce que vous n'utilisez plus. Téléphones, vêtements, électronique, livres, meubles. Un foyer moyen peut libérer 200 000 à 500 000 Ar de trésorerie en 2–3 semaines de tri et vente.",
+        keyNumbers: [
+          { label: "Revenus extras → remboursement", value: "100%" },
+          { label: "Gain de durée possible", value: "30–40%" },
+          { label: "Cash rapide via ventes", value: "200–500k Ar" },
+        ],
+        warnings: [
+          "Ne pas épuiser son énergie au point de ne plus pouvoir travailler — le marathon prime sur le sprint",
+          "Ne pas négliger sa santé ou ses relations proches au nom du remboursement",
+        ],
+        fintrackLink: "Ajoutez chaque revenu supplémentaire dans FinTrack avec la catégorie 'Remboursement accéléré' pour mesurer l'impact réel",
+      },
+      {
+        title: "La psychologie des dettes — Tenir sur la durée",
+        tag: "Survie mentale",
+        tagColor: "#8B5CF6",
+        icon: "🧠",
+        description: "Le plus difficile dans le remboursement de dettes n'est pas financier. C'est mental. Voici comment tenir.",
+        steps: [
+          { label: "Ne vous définissez pas par vos dettes", detail: "Les dettes sont une situation, pas une identité. Des gens brillants et honnêtes se retrouvent en dette à cause de circonstances. Ce n'est pas un jugement de votre valeur." },
+          { label: "Célébrez chaque étape", detail: "Première dette liquidée. 25% du total remboursé. 50%. Chaque seuil mérite une reconnaissance — sans dépenser d'argent. Un repas spécial fait maison, un moment pour soi." },
+          { label: "Parlez-en à quelqu'un de confiance", detail: "Le secret amplifie la honte. Confier sa situation à une personne de confiance — ami proche, conjoint, parent — allège le poids et crée un soutien naturel." },
+          { label: "Visualisez la vie sans dettes", detail: "Écrivez ce que vous ferez avec l'argent des remboursements une fois libéré. Relisez-le les jours difficiles. La clarté sur le 'pourquoi' maintient le 'comment'." },
+        ],
+        tip: "Il y aura des mois difficiles. Des imprévus. Des rechutes. C'est inévitable et normal. Ce qui compte c'est de reprendre le plan dès le lendemain, sans se punir pour l'écart.",
+        keyNumbers: [
+          { label: "Facteur d'abandon n°1", value: "Découragement" },
+          { label: "Temps moyen remboursement", value: "2–5 ans" },
+          { label: "Clé de la réussite", value: "Constance > intensité" },
+        ],
+        warnings: [
+          "Évitez les personnes qui minimisent ou dramatisent — cherchez un soutien neutre et bienveillant",
+          "Ne pas comparer votre situation à celle des autres — chaque parcours est différent",
+          "Les rechutes font partie du processus — une rechute n'annule pas les progrès accomplis",
+        ],
+        fintrackLink: "Utilisez les objectifs FinTrack pour visualiser la progression — regarder le % atteint chaque mois est un puissant moteur de motivation",
+      },
+    ],
+  },
+];
+
+// ════════════════════════════════════════════════════════════════════
+// COMPOSANT PRINCIPAL
+// ════════════════════════════════════════════════════════════════════
+
+export default function FinGuide({ onClose }) {
+  const [activeSection, setActiveSection] = useState("economiser");
+  const [activeArticle, setActiveArticle] = useState(null);
+  const [search, setSearch] = useState("");
+  const [searchAll, setSearchAll] = useState(false);
+
+  const section = SECTIONS.find(s => s.id === activeSection);
+
+  const allArticles = SECTIONS.flatMap(s => s.articles.map(a => ({ ...a, sectionId: s.id, sectionLabel: s.label, sectionColor: s.color })));
+
+  const filteredArticles = searchAll
+    ? allArticles.filter(a =>
+        a.title.toLowerCase().includes(search.toLowerCase()) ||
+        a.description.toLowerCase().includes(search.toLowerCase()) ||
+        a.steps.some(st => st.detail.toLowerCase().includes(search.toLowerCase()))
+      )
+    : (section?.articles.filter(a =>
+        !search || a.title.toLowerCase().includes(search.toLowerCase()) ||
+        a.description.toLowerCase().includes(search.toLowerCase())
+      ) ?? []);
+
+  const article = activeArticle !== null ? section?.articles[activeArticle] : null;
+
+  const totalArticles = SECTIONS.reduce((s, sec) => s + sec.articles.length, 0);
+
+  const handleSearchChange = (v) => {
+    setSearch(v);
+    setSearchAll(v.length > 0);
+    setActiveArticle(null);
+  };
+
+  return (
+    <div style={{ position:"fixed", inset:0, zIndex:2000, display:"flex", fontFamily:"'Plus Jakarta Sans',system-ui,sans-serif", background:C.bg }}>
+
+      {/* ── Sidebar ── */}
+      <div style={{ width:230, background:C.sidebar, display:"flex", flexDirection:"column", borderRight:"1px solid rgba(255,255,255,0.07)", flexShrink:0 }}>
+
+        {/* Header */}
+        <div style={{ padding:"18px 16px 12px", borderBottom:"1px solid rgba(255,255,255,0.07)" }}>
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:10 }}>
+            <div>
+              <div style={{ fontSize:14, fontWeight:900, color:"#E2E8F0", letterSpacing:"-0.3px" }}>📚 FinGuide</div>
+              <div style={{ fontSize:10, color:C.sidebarText, marginTop:2 }}>{totalArticles} articles · 6 sections</div>
+            </div>
+            <div style={{ display:"flex", gap:6 }}>
+              <button onClick={onClose} style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.25),rgba(59,130,246,0.18))", border:"1px solid rgba(99,102,241,0.45)", borderRadius:7, padding:"5px 9px", cursor:"pointer", color:"#A5B4FC", fontSize:10.5, fontWeight:700 }}>← App</button>
+              <button onClick={onClose} style={{ background:"rgba(255,255,255,0.06)", border:"1px solid rgba(255,255,255,0.1)", borderRadius:7, width:26, height:26, cursor:"pointer", color:C.sidebarText, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13 }}>✕</button>
+            </div>
+          </div>
+          {/* Search */}
+          <div style={{ position:"relative" }}>
+            <input value={search} onChange={e => handleSearchChange(e.target.value)}
+              placeholder="Rechercher dans tout le guide…"
+              style={{ width:"100%", padding:"7px 10px 7px 28px", borderRadius:8, border:"1px solid rgba(255,255,255,0.1)", background:"rgba(255,255,255,0.06)", color:"#E2E8F0", fontSize:11.5, outline:"none", boxSizing:"border-box", fontFamily:"inherit" }}
+            />
+            <span style={{ position:"absolute", left:8, top:"50%", transform:"translateY(-50%)", fontSize:11, opacity:0.5 }}>🔍</span>
+            {search && <button onClick={() => handleSearchChange("")} style={{ position:"absolute", right:8, top:"50%", transform:"translateY(-50%)", background:"none", border:"none", color:C.sidebarText, cursor:"pointer", fontSize:12 }}>✕</button>}
+          </div>
+        </div>
+
+        {/* Nav */}
+        <nav style={{ flex:1, padding:"6px 8px", overflowY:"auto" }}>
+          <div style={{ fontSize:9, fontWeight:800, color:C.sidebarText, letterSpacing:"0.1em", textTransform:"uppercase", padding:"8px 8px 4px" }}>Sections</div>
+          {SECTIONS.map(s => (
+            <button key={s.id} onClick={() => { setActiveSection(s.id); setActiveArticle(null); setSearch(""); setSearchAll(false); }}
+              style={{ display:"flex", alignItems:"center", gap:9, width:"100%", padding:"9px 10px", marginBottom:2, borderRadius:"0 10px 10px 0", background:activeSection===s.id&&!searchAll?`${s.color}22`:"transparent", border:"none", borderLeft:`2.5px solid ${activeSection===s.id&&!searchAll?s.color:"transparent"}`, color:activeSection===s.id&&!searchAll?"#E2E8F0":C.sidebarText, cursor:"pointer", textAlign:"left", fontSize:12.5, fontWeight:activeSection===s.id&&!searchAll?700:400, transition:"all 0.15s" }}
+            >
+              <span style={{ fontSize:15 }}>{s.emoji}</span>
+              <span style={{ flex:1 }}>{s.label}</span>
+              <span style={{ fontSize:9.5, opacity:0.45 }}>{s.articles.length}</span>
+            </button>
+          ))}
+        </nav>
+
+        {/* Footer */}
+        <div style={{ padding:"10px 14px", borderTop:"1px solid rgba(255,255,255,0.07)" }}>
+          <div style={{ fontSize:9.5, color:C.sidebarText, lineHeight:1.5 }}>
+            🔗 Les liens <span style={{ color:"#818CF8" }}>FinTrack</span> indiquent où appliquer chaque conseil directement dans votre app.
+          </div>
+        </div>
+      </div>
+
+      {/* ── Contenu principal ── */}
+      <div style={{ flex:1, display:"flex", flexDirection:"column", overflow:"hidden" }}>
+
+        {/* Page header */}
+        <div style={{ background:C.card, borderBottom:`1px solid ${C.border}`, padding:"14px 28px", display:"flex", alignItems:"center", gap:14, flexShrink:0 }}>
+          <div style={{ width:40, height:40, borderRadius:11, background:searchAll?`${C.indigo}18`:`${section?.color}18`, display:"flex", alignItems:"center", justifyContent:"center", fontSize:20, flexShrink:0 }}>
+            {searchAll ? "🔍" : article ? article.icon : section?.emoji}
+          </div>
+          <div style={{ flex:1, minWidth:0 }}>
+            <h1 style={{ fontSize:17, fontWeight:800, color:C.text, margin:0, letterSpacing:"-0.3px", overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap" }}>
+              {searchAll ? `Résultats pour "${search}"` : article ? article.title : section?.label}
+            </h1>
+            <p style={{ fontSize:11, color:C.muted, margin:0, marginTop:2 }}>
+              {searchAll ? `${filteredArticles.length} article${filteredArticles.length>1?"s":""}` : article ? `${section?.label} · ${article.tag}` : section?.subtitle}
+            </p>
+          </div>
+          {article && !searchAll && (
+            <button onClick={() => setActiveArticle(null)} style={{ padding:"7px 14px", borderRadius:8, background:C.faint, border:`1px solid ${C.border}`, color:C.muted, fontSize:12, fontWeight:600, cursor:"pointer", flexShrink:0 }}>← Retour</button>
+          )}
+        </div>
+
+        {/* Contenu */}
+        <div style={{ flex:1, overflowY:"auto", padding:"24px 28px" }}>
+
+          {!article ? (
+            <div>
+              {/* Intro section */}
+              {!searchAll && (
+                <div style={{ background:`linear-gradient(135deg,${section?.color}12,${section?.color}05)`, border:`1px solid ${section?.color}30`, borderRadius:14, padding:"16px 22px", marginBottom:22 }}>
+                  <p style={{ fontSize:13.5, color:C.text, lineHeight:1.6, margin:0, fontWeight:500 }}>{section?.intro}</p>
+                </div>
+              )}
+
+              {/* Grille d'articles */}
+              <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fill,minmax(310px,1fr))", gap:14 }}>
+                {filteredArticles.map((a, i) => {
+                  const sec = searchAll ? SECTIONS.find(s=>s.id===a.sectionId) : section;
+                  const articleIndex = searchAll ? sec?.articles.indexOf(sec?.articles.find(art=>art.title===a.title)) : i;
+                  return (
+                    <button key={i} onClick={() => { if(searchAll){setActiveSection(a.sectionId);setSearchAll(false);setSearch("");} setActiveArticle(articleIndex); }}
+                      style={{ textAlign:"left", background:C.card, border:`1px solid ${C.border}`, borderRadius:14, padding:"18px 20px", cursor:"pointer", borderTop:`3px solid ${a.tagColor}`, boxShadow:"0 1px 4px rgba(0,0,0,0.04)", transition:"box-shadow 0.15s, transform 0.15s" }}
+                      onMouseEnter={e=>{e.currentTarget.style.boxShadow="0 6px 20px rgba(0,0,0,0.1)";e.currentTarget.style.transform="translateY(-2px)";}}
+                      onMouseLeave={e=>{e.currentTarget.style.boxShadow="0 1px 4px rgba(0,0,0,0.04)";e.currentTarget.style.transform="";}}
+                    >
+                      <div style={{ display:"flex", alignItems:"flex-start", gap:12, marginBottom:10 }}>
+                        <span style={{ fontSize:26, flexShrink:0 }}>{a.icon}</span>
+                        <div style={{ flex:1 }}>
+                          {searchAll && <div style={{ fontSize:9.5, color:sec?.color, fontWeight:700, marginBottom:3 }}>{sec?.label}</div>}
+                          <div style={{ display:"flex", alignItems:"center", gap:7, marginBottom:5 }}>
+                            <span style={{ fontSize:9, fontWeight:800, color:a.tagColor, background:`${a.tagColor}15`, padding:"2px 7px", borderRadius:5, textTransform:"uppercase", letterSpacing:"0.05em" }}>{a.tag}</span>
+                          </div>
+                          <div style={{ fontSize:13.5, fontWeight:800, color:C.text, lineHeight:1.3 }}>{a.title}</div>
+                        </div>
+                      </div>
+                      <p style={{ fontSize:12, color:C.muted, lineHeight:1.5, margin:"0 0 12px" }}>{a.description}</p>
+                      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+                        <div style={{ display:"flex", gap:8 }}>
+                          <span style={{ fontSize:10.5, color:C.muted }}>{a.steps.length} étapes</span>
+                          {a.examples?.length>0 && <span style={{ fontSize:10.5, color:C.muted }}>· {a.examples.length} exemples</span>}
+                          {a.warnings?.length>0 && <span style={{ fontSize:10.5, color:C.red }}>· {a.warnings.length} ⚠</span>}
+                        </div>
+                        <span style={{ fontSize:12, color:sec?.color||section?.color, fontWeight:700 }}>Lire →</span>
+                      </div>
+                    </button>
+                  );
+                })}
+                {filteredArticles.length === 0 && (
+                  <div style={{ gridColumn:"1/-1", padding:"40px 20px", textAlign:"center", color:C.muted, fontSize:14 }}>
+                    Aucun résultat pour "{search}". Essayez un autre mot-clé.
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* ── Détail article ── */
+            <div style={{ maxWidth:740, margin:"0 auto" }}>
+
+              {/* Tag + description */}
+              <div style={{ display:"flex", alignItems:"flex-start", gap:14, marginBottom:22 }}>
+                <span style={{ fontSize:44, flexShrink:0, lineHeight:1 }}>{article.icon}</span>
+                <div>
+                  <span style={{ fontSize:10, fontWeight:800, color:article.tagColor, background:`${article.tagColor}15`, padding:"3px 10px", borderRadius:6, textTransform:"uppercase", letterSpacing:"0.06em" }}>{article.tag}</span>
+                  <p style={{ fontSize:15, color:C.muted, margin:"8px 0 0", lineHeight:1.6, fontWeight:500 }}>{article.description}</p>
+                </div>
+              </div>
+
+              {/* Chiffres clés */}
+              {article.keyNumbers?.length > 0 && (
+                <div style={{ display:"grid", gridTemplateColumns:`repeat(${article.keyNumbers.length},1fr)`, gap:10, marginBottom:20 }}>
+                  {article.keyNumbers.map((kn,i) => (
+                    <div key={i} style={{ background:`${section?.color}10`, border:`1px solid ${section?.color}25`, borderRadius:10, padding:"12px 14px", textAlign:"center" }}>
+                      <div style={{ fontSize:18, fontWeight:900, color:section?.color, letterSpacing:"-0.5px" }}>{kn.value}</div>
+                      <div style={{ fontSize:10.5, color:C.muted, marginTop:3 }}>{kn.label}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Plan d'action */}
+              <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden", marginBottom:16 }}>
+                <div style={{ padding:"13px 20px", borderBottom:`1px solid ${C.border}`, background:C.faint }}>
+                  <div style={{ fontSize:11, fontWeight:800, color:C.text, textTransform:"uppercase", letterSpacing:"0.06em" }}>📋 Plan d'action</div>
+                </div>
+                {article.steps.map((step, i) => (
+                  <div key={i} style={{ display:"flex", gap:16, padding:"15px 20px", borderBottom:i<article.steps.length-1?`1px solid ${C.border}`:"none" }}>
+                    <div style={{ width:26, height:26, borderRadius:"50%", flexShrink:0, marginTop:2, background:`${section?.color}18`, color:section?.color, display:"flex", alignItems:"center", justifyContent:"center", fontSize:11, fontWeight:900 }}>{i+1}</div>
+                    <div>
+                      <div style={{ fontSize:13, fontWeight:700, color:C.text, marginBottom:4 }}>{step.label}</div>
+                      <div style={{ fontSize:12.5, color:C.muted, lineHeight:1.65 }}>{step.detail}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Exemples concrets */}
+              {article.examples?.length > 0 && (
+                <div style={{ background:C.card, borderRadius:14, border:`1px solid ${C.border}`, overflow:"hidden", marginBottom:16 }}>
+                  <div style={{ padding:"13px 20px", borderBottom:`1px solid ${C.border}`, background:C.faint }}>
+                    <div style={{ fontSize:11, fontWeight:800, color:C.text, textTransform:"uppercase", letterSpacing:"0.06em" }}>💡 Exemples concrets</div>
+                  </div>
+                  {article.examples.map((ex, i) => (
+                    <div key={i} style={{ padding:"14px 20px", borderBottom:i<article.examples.length-1?`1px solid ${C.border}`:"none" }}>
+                      <div style={{ fontSize:12.5, fontWeight:700, color:C.text, marginBottom:4 }}>{ex.title}</div>
+                      <div style={{ fontSize:12, color:C.muted, lineHeight:1.6 }}>{ex.detail}</div>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Avertissements */}
+              {article.warnings?.length > 0 && (
+                <div style={{ background:`${C.red}08`, border:`1px solid ${C.red}30`, borderRadius:12, padding:"14px 18px", marginBottom:16 }}>
+                  <div style={{ fontSize:11, fontWeight:800, color:C.red, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:10 }}>⚠ À éviter absolument</div>
+                  {article.warnings.map((w,i) => (
+                    <div key={i} style={{ display:"flex", gap:10, marginBottom:i<article.warnings.length-1?8:0, alignItems:"flex-start" }}>
+                      <span style={{ color:C.red, fontSize:13, flexShrink:0, marginTop:1 }}>✗</span>
+                      <span style={{ fontSize:12.5, color:C.text, lineHeight:1.5 }}>{w}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Conseil clé */}
+              <div style={{ background:`${C.amber}10`, border:`1px solid ${C.amber}40`, borderRadius:12, padding:"14px 18px", marginBottom:16, display:"flex", gap:12, alignItems:"flex-start" }}>
+                <span style={{ fontSize:20, flexShrink:0 }}>💡</span>
+                <div>
+                  <div style={{ fontSize:11, fontWeight:800, color:C.amber, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:5 }}>Conseil clé</div>
+                  <div style={{ fontSize:13, color:C.text, lineHeight:1.65, fontWeight:500 }}>{article.tip}</div>
+                </div>
+              </div>
+
+              {/* Appliquer dans FinTrack */}
+              <div style={{ background:`${C.indigo}10`, border:`1px solid ${C.indigo}30`, borderRadius:12, padding:"14px 18px", marginBottom:24, display:"flex", gap:12, alignItems:"flex-start" }}>
+                <span style={{ fontSize:20, flexShrink:0 }}>🔗</span>
+                <div>
+                  <div style={{ fontSize:11, fontWeight:800, color:C.indigo, textTransform:"uppercase", letterSpacing:"0.06em", marginBottom:5 }}>Appliquer dans FinTrack</div>
+                  <div style={{ fontSize:13, color:C.text, lineHeight:1.65 }}>{article.fintrackLink}</div>
+                </div>
+              </div>
+
+              {/* Navigation */}
+              <div style={{ display:"flex", gap:10 }}>
+                {activeArticle > 0 && (
+                  <button onClick={() => setActiveArticle(activeArticle-1)} style={{ flex:1, padding:"11px 16px", borderRadius:10, border:`1px solid ${C.border}`, background:C.card, color:C.text, fontSize:12, fontWeight:600, cursor:"pointer", textAlign:"left" }}>
+                    ← {section?.articles[activeArticle-1]?.title}
+                  </button>
+                )}
+                {activeArticle < (section?.articles.length??0)-1 && (
+                  <button onClick={() => setActiveArticle(activeArticle+1)} style={{ flex:1, padding:"11px 16px", borderRadius:10, background:section?.color, color:"#fff", border:"none", fontSize:12, fontWeight:700, cursor:"pointer", textAlign:"right" }}>
+                    {section?.articles[activeArticle+1]?.title} →
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
